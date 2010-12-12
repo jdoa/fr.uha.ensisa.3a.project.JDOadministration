@@ -1,0 +1,23 @@
+ 
+<!DOCTYPE web-app PUBLIC
+ "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN"
+ "http://java.sun.com/dtd/web-app_2_3.dtd">
+
+<web-app >
+    <servlet>
+        <servlet-name>DataNucleus</servlet-name>
+        <servlet-class>org.datanucleus.rest.RestServlet</servlet-class>
+        <init-param>
+            <param-name>persistence-context</param-name>
+            <param-value>datanucleus.properties</param-value>
+        </init-param>	     
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>DataNucleus</servlet-name>
+        <url-pattern>/dn/*</url-pattern>
+    </servlet-mapping>
+    <welcome-file-list>
+    <welcome-file>index.html</welcome-file>
+  </welcome-file-list>
+</web-app>
+
