@@ -10,7 +10,7 @@ import javax.jdo.annotations.Persistent;
 import javax.jdo.annotations.PrimaryKey;
  
 
-@PersistenceCapable(identityType=IdentityType.APPLICATION,table="Product",schema="Product_schema")
+@PersistenceCapable(identityType=IdentityType.APPLICATION,table="Product")
 @Inheritance(strategy=InheritanceStrategy.NEW_TABLE)
 @Discriminator(strategy=DiscriminatorStrategy.CLASS_NAME)
 public class Product

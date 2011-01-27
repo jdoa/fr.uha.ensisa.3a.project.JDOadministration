@@ -9,7 +9,7 @@ import javax.jdo.annotations.PersistenceCapable;
 import javax.jdo.annotations.Persistent;
 import javax.jdo.annotations.PrimaryKey;
   
-@PersistenceCapable(identityType=IdentityType.APPLICATION,table="Book",schema="Book_schema")
+@PersistenceCapable(identityType=IdentityType.APPLICATION,table="Book")
 @Inheritance(strategy=InheritanceStrategy.NEW_TABLE)
 @Discriminator(strategy=DiscriminatorStrategy.CLASS_NAME)
 public class Book extends Product

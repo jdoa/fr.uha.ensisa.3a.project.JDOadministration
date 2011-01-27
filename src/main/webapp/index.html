@@ -2,35 +2,43 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-<title>mama page d'accueuil'</title>
+
+<title>AdministrateurJDO</title>
 </head>
 <body>
-hello world<br><br><br><br>
-<a href="home.jsp">page jsp</a>
-
-<H3>
- 
-<script language="Javascript"  type="text/javascript" >
-var xhr_object = null; 
-//alert("Début"); 
-	if(window.XMLHttpRequest) 
-	   xhr_object = new XMLHttpRequest(); 
-	else if(window.ActiveXObject) 
-	   xhr_object = new ActiveXObject("Microsoft.XMLHTTP"); 
-	else {
-		alert("Votre navigateur ne supporte pas les objets XMLHTTPRequest..."); 
-		 } 
-	//alert("envoi de la requete");
-	//http://localhost/datanucleusEclipseTutorial
-	//xhr_object.open("GET","dn/datanucleusTutorial.core.Book", false); 
-	xhr_object.open("GET","dn/persistence.model.Book", false);
-	xhr_object.send(null); 
-	//alert("requete GET envoyé");
-	if(xhr_object.readyState == 4) document.write(xhr_object.responseText) //alert("Requête effectuée !"); 
-	else alert("échec de la requête ! ");
-
+<H2 align="center">Administrateur JDO</H2>
+<br>
+<br>
+<p id="list"> </p>
+<script type="text/javascript" src="jquery.min.js"></script>
+<script type="text/javascript" src="treeHandler.js"></script>
+<script type="text/javascript">
+var tree,treeI=0,treeJ=1;
+var listRoot=new Node("Package list",null);
+listRoot.isVisible=true;
+var doc="";
+//document.writeln("salut");
+$.ajax({
+	  url: 'ClassListing',
+	  dataType: 'json',
+	  //data: data,
+	  timeout: 3000,
+	  success: function(feed) {  	
+	  	var x=feed;
+	  //	document.writeln("start");
+	  	json2node(x,listRoot);
+	    //document.writeln("json2node success");
+		generateFqn(listRoot);
+		//document.writeln("generateFqn success");
+		doc=view(listRoot,doc);
+		//document.writeln("view success");
+		//alert(doc);
+		document.getElementById("list").innerHTML = doc;
+		//document.write(list);
+		
+	  }
+});
+//document.write("end");
 </script>
-
-</H3>
 </body>
 </html>
