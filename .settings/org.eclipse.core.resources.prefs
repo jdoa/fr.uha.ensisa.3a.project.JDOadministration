@@ -1,7 +1,5 @@
-#Sun Jan 23 23:15:37 CET 2011
+#Tue Feb 01 04:03:41 CET 2011
 eclipse.preferences.version=1
 encoding//src/main/java=ISO-8859-1
-encoding//src/main/java/persistence/model/default.ecore=UTF-8
-encoding//src/main/java/persistence/model/default.ecore_diagram=UTF-8
 encoding//src/main/java/persistence/utils/PersistenceHelper.java=ISO-8859-1
 encoding/<project>=ISO-8859-1

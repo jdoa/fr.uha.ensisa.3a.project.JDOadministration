@@ -1,264 +1,810 @@
-function Node(label,fils) {
-	this.label=label;
-	this.fils=fils;
-	this.isVisible=false;
-	this.fqn="Package list";
+function Node(label, fils) {
+	this.label = label;
+	this.fils = fils;
+	this.isVisible = false;
+	this.isClass = false;
+	this.superClass = null;
+	this.showMetadata = false;
+	this.showSelectionArea=false;
+	this.showObjects=false;
+	this.fields = null;
+	this.fqn = "Package list";
 }
-function getNodeByName(root,nodeName){
-	if(nodeName==root.fqn) return root;
-	if(root.fils!=undefined && root.fils!=null){
-			if(root.fils.length!=undefined && root.fils.length!=null && root.fils.length >0){
-				var i=0;
-				while(i<root.fils.length){
-					var res=getNodeByName(root.fils[i],nodeName);
-					if(res!=undefined && res!=null) return res;
-					i++;
-				}
-			}
-			else{
-				return getNodeByName(root.fils,nodeName);
-			}
+function Field() {
+	this.name = "";
+	this.type = false;
+	this.isPublic = false;
+	this.isPrivate = false;
+	this.isProtected = false;
+	this.isStatic = false;
+	this.isFinal = false;
+	this.isInherited=false;
+	this.isPk=false;
+}
+var listRoot = new Node("Package list", null);
+listRoot.isVisible = true;
+var jsonObjectsList;
+var doc = "";
 
-		}		
-		return null;
+function start() {
+	$.ajax({
+		url : 'ClassListing',
+		dataType : 'json',
+		// data: data,
+		timeout : 3000,
+		success : function(feed) {
+			var x = feed;
+			// document.writeln("start");
+			json2node(x, listRoot);
+			// document.writeln("json2node success");
+			generateFqn(listRoot);
+			// document.writeln("generateFqn success");
+			// doc+="<ul>";
+			/*
+			 * if (listRoot.fils != undefined && listRoot.fils != null) { if
+			 * (listRoot.fils.length != undefined && listRoot.fils.length !=
+			 * null) { for (i = 0; i < listRoot.fils.length; i++)
+			 * listRoot.fils[i].isVisible = true; } else listRoot.fils.isVisible =
+			 * true; }
+			 */
+			doc = view(listRoot, doc);
+			//alert(doc);
+			// alert("doc:"+doc);
+			// doc+="<li>";
+			// doc+="</ul>";
+			// document.writeln("view success");
+			// alert(doc);
+		//	window.document.list=doc;
+			showNewPage(doc);
+//			document.getElementById("list").innerHTML= doc;
+			// var h=document.getElementById("myHeader");
+			 //x=doc;
+			// alert(x.innerHTML);
+		//	var r=document.getElementById('list');r.innerHTML= doc;
+		//	document.
+			// document.write(list);
+
+		}
+	});
 }
-function generateFqn(root) { //root is a Node
-//	document.write(root.label+"<br>");
-	if(root.fils!=undefined && root.fils!=null){
-	//	document.write(root.label+" has children<br>");
-		if(root.fils.length!=undefined && root.fils.length!=null && root.fils.length >0){
-		//	document.write(root.label+" has "+root.fils.length +" children<br>");
-			var i=0;
-			while(i<root.fils.length){
-			//	document.write(root.fils.label+"is the "+i+" child of "+root.label+"<br>");
-				if(root.fqn!="Package list")
-					root.fils[i].fqn=root.fqn+"."+root.fils[i].label;
+
+function getNodeByName(root, nodeName) {
+	if (nodeName == root.fqn)
+		return root;
+	if (root.fils != undefined && root.fils != null) {
+		if (root.fils.length != undefined && root.fils.length != null
+				&& root.fils.length > 0) {
+			var i = 0;
+			while (i < root.fils.length) {
+				var res = getNodeByName(root.fils[i], nodeName);
+				if (res != undefined && res != null)
+					return res;
+				i++;
+			}
+		} else
+			return getNodeByName(root.fils, nodeName);
+	}
+	return null;
+}
+function generateFqn(root) { // root is a Node
+	if (root.fils != undefined && root.fils != null) {
+		if (root.fils.length != undefined && root.fils.length != null
+				&& root.fils.length > 0) {
+			var i = 0;
+			while (i < root.fils.length) {
+				if (root.fqn != "Package list")
+					root.fils[i].fqn = root.fqn + "." + root.fils[i].label;
 				else
-					root.fils[i].fqn=root.fils[i].label;
+					root.fils[i].fqn = root.fils[i].label;
 				generateFqn(root.fils[i]);
 				i++;
 			}
-		}
-		else{
-		//	document.write(root.label+" has only one child wich is:"+ root.fils.label+"<br>");
-			if(root.fqn!="Package list")
-				root.fils.fqn=root.fqn+"."+root.fils.label;
+		} else {
+			if (root.fqn != "Package list")
+				root.fils.fqn = root.fqn + "." + root.fils.label;
 			else
-				root.fils.fqn=root.fils.label;
+				root.fils.fqn = root.fils.label;
 			generateFqn(root.fils);
-				//		doc=view(root.fils,doc);
-				//		document.write(root.label+" a un seul fils : "+ root.fils.label);
 		}
-
-	}		
-	return ;
-}
-
-function json2node(root,node){ // root is a Json Object , node is a Node
-//	document.writeln("<br> => "+root.label+"<br>");
-	if(root.label!=undefined){
-	//	document.writeln("<br>"+root.label+"<br>");
-	//	if(node.label!=undefined && node.label!=null) node.label=node.label+"."+root.label;
-	//	else
-			node.label=root.label;
-		//document.write(root.label+"<br>");
-//		if (root.isClass=="true") { return;
-//		document.write("is a class");
-//			}
-		//afficher(root.children);
 	}
-		//cas d_un arbre donc affichage des noeuds
-	if( root.children!=undefined && root.children!=null){
-	//	document.write("<br> info => "+root.label);
-	//	document.write("<br>element avec fils :"+ root.label +"<br>");
-		
-		if(root.children.length!=undefined && root.children.length!=null && root.children.length>0) {
-			//document.write("<br>element avec "+root.children.length +" fils :"+ root.label+"<br>" );
-			var pfils= new Array(root.children.length);
-			var j=0;
-			// c une suite d_elements , donc affichage un par un
-			for(j=0;j<root.children.length;j++){
-	//			document.write(root.label+".children["+j+"]:"+root.children[j].label+"<br>");
-				var ssNode= new Node();
-		//		ssNode.label= root.label;
-				json2node(root.children[j],ssNode);
-				pfils[j]=ssNode;
-			}
-			node.fils=pfils;
-		}else{
-			var ssNode= new Node();
-	//		ssNode.label=root.label;
-			json2node(root.children,ssNode);
-			node.fils=ssNode;
-		}
-	}	
-	return ;
-}
-var tab=1;
-function getIconVal(root){
-if(root.fils!=undefined && root.fils!=null){
-	if(root.fils.length!=undefined && root.fils.length!=null && root.fils.length >0){
-//		document.write(root.label+" a "+ root.fils.length +"fils<br>");
-		var i=0;
-		while(i<root.fils.length){
-			if(root.fils[i].isVisible) return "-";
-			i++;
-		}
-	}else
-		if(root.fils.isVisible) return "-";
-}		
-return "+";
-
-
-}
-function view(root,doc) { //root is a Node
-//	document.writeln("<br>");
-//	document.writeln(root.label);
-	//with (this) {
-	//if (!root.isVisible) return doc;
-	
-	if(root.isVisible){
-			//document.write(root.fqn+"<br>");
-		for(i=0;i<tab;i++,doc+="&nbsp;");
-		doc+='<a href="javascript:;" onClick=\'showChildren(\"'+root.fqn+'\");\'>';
-	 	doc+="<input type=\"button\" " +"name=\""+root.fqn+"\" " +"value=\""+getIconVal(root)+"\" style=\"font-size:3mm; padding: 0%; \" /> "+root.fqn+"&nbsp;";
-	 	doc+="</a>";
-		doc+="<br>";
-	}
-	if(root.fils!=undefined && root.fils!=null){
-//	 document.write(root.label+" a des fils que voilà :<br>");
-		tab=tab+3;
-		if(root.fils.length!=undefined && root.fils.length!=null && root.fils.length >0){
-	//		document.write(root.label+" a "+ root.fils.length +"fils<br>");
-			var i=0;
-			while(i<root.fils.length){
-	//			document.writeln(" traitement de "+root.fils[0].label);
-	//			document.write(root.fils[i].label+" est le fils "+i+"/" +root.fils.length +"de"+root.label);
-				doc=view(root.fils[i],doc);
-				i++;
-			}
-		}else
-			doc=view(root.fils,doc);
-	//		document.write(root.label+" a un seul fils : "+ root.fils.label);
-		    tab=tab-3;
-	}		
-	return doc;
+	return;
 }
 
-tree= Array();
-tree[0]=Array();
-function setChildrensVisibility(root,val){
-	if(root.fils!=undefined && root.fils!=null){
-			if(root.fils.length!=undefined && root.fils.length!=null && root.fils.length >0){
-				var i=0;
-				while(i<root.fils.length){
-					root.fils[i].isVisible=val;
-					if(!val) setChildrensVisibility(root.fils[i],val);
-					i++;
+function json2node(root, node) { // root is a Json Object , node is a Node
+	if (root.label != undefined && root.label != null) {
+		node.label = root.label;
+		if (root.isClass != undefined && root.isClass != null
+				&& root.isClass == "true") {
+			node.superClass=root.superClass;
+			var tmp=node.label.split("\.");
+			if(tmp.length>0) node.label=tmp[tmp.length-1];
+			node.isClass = true;
+			if (root.fields != undefined && root.fields != null) {
+				if (root.fields.length != undefined
+						&& root.fields.length != null && root.fields.length > 0) {
+					// the class has many fields, so parsing them all
+					var fields = new Array(root.fields.length);
+					for (i = 0; i < root.fields.length; i++) {
+						var field = new Field();
+						field.name = root.fields[i].name;
+						field.type = root.fields[i].type;
+						field.isPublic = root.fields[i].isPublic;
+						field.isPrivate = root.fields[i].isPrivate;
+						field.isProtected = root.fields[i].isProtected;
+						field.isStatic = root.fields[i].isStatic;
+						field.isFinal = root.fields[i].isFinal;
+						field.isInherited = root.fields[i].isInherited;
+						field.isPk=root.fields[i].isPk;
+						fields[i] = field;
+						// alert(field.name+" "+"isPublic "+field.isPublic)
+					}
+					node.fields = fields;
+				} else {
+					var fields = new Array(1);
+					var field = new Field();
+					field.name = root.fields.name;
+					field.type = root.fields.type;
+					field.isPublic = root.fields.isPublic;
+					field.isPrivate = root.fields.isPrivate;
+					field.isProtected = root.fields.isProtected;
+					field.isStatic = root.fields.isStatic;
+					field.isFinal = root.fields.isFinal;
+					field.isInherited = root.fields.isInherited;
+					field.isPk=root.fields.isPk;
+					fields[0] = field;
+					node.fields = fields;
 				}
 			}
-			else{
-				root.fils.isVisible=val;
-				if(!val) setChildrensVisibility(root.fils,val);
+		}
+	}
+	// cas d_un arbre donc affichage des noeuds
+	if (root.children != undefined && root.children != null) {
+		if (root.children.length != undefined && root.children.length != null
+				&& root.children.length > 0) {
+			var pfils = new Array(root.children.length);
+			var j = 0;
+			// c une suite d_elements , donc affichage un par un
+			for (j = 0; j < root.children.length; j++) {
+				var ssNode = new Node();
+				json2node(root.children[j], ssNode);
+				pfils[j] = ssNode;
 			}
-		}		
-		return null;
+			node.fils = pfils;
+		} else {
+			var ssNode = new Node();
+			json2node(root.children, ssNode);
+			node.fils = ssNode;
+		}
+	}
+	return;
 }
-function showChildren(nodeFqn){
-	//alert("recherche de "+nodeFqn);
-	var node=getNodeByName(listRoot,nodeFqn);
-	if(node==undefined || node == null) { alert("erreur getNodeByName");return;}
-	//$(document).ready(function(){
-	    
-	//});
-	
-var val=	$('input:button[name='+nodeFqn+']').val();
-//	var valeur=$("input[name="+nodeFqn+"]")[0].value;
-//	$(":input,[name='"+nodeFqn+"'],:first").Val("-");
-	
-	if (val!=undefined && val!=null){
-		if(val=="+"){//alert(valeur);
-		//	$('input:button[name='+nodeFqn+']').val("-");
-			setChildrensVisibility(node,true);
+function getIconVal(root) {
+	if (root.fils != undefined && root.fils != null) {
+		if (root.fils.length != undefined && root.fils.length != null
+				&& root.fils.length > 0) {
+			var i = 0;
+			while (i < root.fils.length) {
+				if (root.fils[i].isVisible)
+					return "-";
+				i++;
+			}
+		} else if (root.fils.isVisible)
+			return "-";
+	}
+	return "+";
+}
+function getIcon(root) {
+	if (!root.isClass)
+		return 'icons/package.jpg';
+	return 'icons/class.jpg';
+}
+function view(root, doc) { // root is a Node
+	if (root.isVisible) {
+		if (root.label == "Package list") {
+			doc += 
+						'<button  name=\"' 
+							+ root.fqn
+							//+ '\" "value=\"' + getIconVal(root)
+							+ '\" onClick=\'showChildren(\"' 
+							+ root.fqn
+							+ '\"); \' > '
+					//		'<u id=\"' + root.fqn + '\" style=\"cursor: pointer\; color:#0000FF\;\" onClick=\'showChildren(\"'
+					//		+ root.fqn
+					//	    +'\");\'> '
+					// +'<a href=\">'
+							+ root.label
+					//		+'</u>';
+					
+					//+ '</div>';
+			+ '</button>' ;
+		} else {
+			// doc+='<a
+			// href="javascript:;"onClick=\'showChildren(\"'+root.fqn+'\");\'>
+			// ';
+			
+//			doc += 
+			doc += '<div id=\"' + root.fqn + '\" style=\"cursor:pointer\;width:30px;overflow:visible;\" onClick=\'showChildren(\"'
+				+ root.fqn + '\");\'> '
+				+'<table><tr><td nowrap=\"nowrap\">'
+				+'<img src=\"' + getIcon(root) + '\" alt=\"\" >'
+				+ '&nbsp;'
+				+ root.label ;
+			if(root.isClass && root.superClass!="java.lang.Object"){
+				doc+="&nbsp; extends "+root.superClass;
+			}
+			doc+='</tr></td></table>';
+			doc += //'<input type=\"hidden\" "name=\"' + root.fqn
+				//	+ '\" " +"value=\"' + getIconVal(root)
+				//	+ '\" onClick=\'showChildren(\"' + root.fqn
+				//	+ '\");\' style=\"font-size:3mm; padding: 0%; \" /> '
+					 '</div>';
+			if (root.isClass ) {
+				if (root.showMetadata) {
+					doc+='<dl><dd>';
+					if(root.showSelectionArea){
+						doc = addMetaDataAndSelectionArea(root, doc);
+					}else doc = addClassMetadata(root, doc);
+					if(root.showObjects){
+						doc=jsonObjectList2HtmlTable(jsonObjectsList,root.fqn,doc);
+						doc+='<br>';
+					}
+					doc+='</dd></dl>';
+				}
+				return doc;
+			}
+
 		}
-		else{//alert(valeur);
-		//	$('input:button[name='+nodeFqn+']').val("+");
-			setChildrensVisibility(node,false);
+	}
+	if (root.fils != undefined && root.fils != null) {
+		if (root.fils.length != undefined && root.fils.length != null
+				&& root.fils.length > 0) {
+			var i = 0;
+			if (root.fils[0].isVisible)
+				doc += '<dl>';
+			else
+				return doc;
+			while (i < root.fils.length) {
+				doc += '<dd>';
+				doc = view(root.fils[i], doc);
+				doc += '</dd>';
+				i++;
+			}
+			doc += '</dl>';
+		} else {
+			if (root.fils.isVisible)
+				doc += '<dl>';
+			else
+				return doc;
+			doc += '<dd>';
+			doc = view(root.fils, doc);
+			doc += '</dd>';
+			doc += '</dl>';
 		}
-		var doc="";
-		doc=view(listRoot,doc);
-		document.getElementById("list").innerHTML = doc;
-/*	
-		if(val=="+"){
-			$('input:button[name='+nodeFqn+']').val("-");
+	}
+	return doc;
+}
+function setChildrensVisibility(root, val) {
+//	alert("setting children of "+root.label+"to "+val);
+	if (root.isClass) {
+		root.showMetadata = val;
+		if(!val) {
+			root.showSelectionArea=false;
+			root.showObjects=false;
+		}
+		return;
+	}
+	if (root.fils != undefined && root.fils != null) {
+		if (root.fils.length != undefined && root.fils.length != null
+				&& root.fils.length > 0) {
+			var i=0;
+			for(i=0;i<root.fils.length;i++) {
+				root.fils[i].isVisible = val;
+//				alert("child "+i+"/"+root.fils.length+" : "+root.fils[i].label+" .isVisible sat to "+root.fils[i].isVisible);
+				if (val==false)
+					setChildrensVisibility(root.fils[i], false);
+			}
+		} else {
+			
+			root.fils.isVisible = val;
+//			alert(root.fils.label+" .isVisible sat to "+root.fils.isVisible);
+			if (val==false)
+				setChildrensVisibility(root.fils, false);
+		}
+	}
+	return null;
+}
+function getSymbols(node) {
+	if (node.isPublic == "true")
+		return '+ ';
+	if (node.isPrivate == "true")
+		return '- ';
+	if (node.isProtected == "true")
+		return '# ';
+}
+function insertOkIcon(boolState) {
+	if (boolState == "true")
+		return '<img src=\"icons/ok.jpg\" alt=\"\" />';
+	return '';
+}
+function addMetaDataAndSelectionArea(node,doc){
+	if (node.fields != undefined && node.fields != null) {
+		doc += '<FORM name=\"select'+node.fqn+'\">'
+			+'<table border=\"0\" frame=\"void\" rules=\"none\" >'
+			+'<tr><th></th></tr><tr><td align=\"right\">'
+			+'<br><table border=\"1\" cellpadding=\"3\"  frame=\"box\" rules=\"rows\" >'
+				+'<tr bgcolor="LightSteelBlue">'
+					+'<th align=\"left\" valign=\"middle\">Fields</th>'
+					+'<th align=\"center\" valign=\"middle\">Type</th>'
+					+'<th align=\"center\" valign=\"middle\">Private</th>'
+					+'<th align=\"center\" valign=\"middle\">Protected</th>'
+					+'<th align=\"center\" valign=\"middle\">Public</th>'
+					+'<th align=\"center\" valign=\"middle\">Static</th>'
+					+'<th align=\"center\" valign=\"middle\">Final</th>'
+					+'<th align=\"center\" valign=\"middle\">Inherited</th>'
+					+'<th><input type=\"button\"  value=\"<<\" onClick=\'addDelSelectionArea(\"'+node.fqn+'\");\'></th>'
+				//	+'<th align=\"center\" valign=\"middle\">selector</th>'
+					+'<th align=\"center\" valign=\"middle\">value</th>'
+					+'<th align=\"center\" valign=\"middle\">order by</th>'
+					
+				+'</tr>';
+	   // onClick=' this.form.zonedetexte.value="NOUVEAU" '>
+		if (node.fields.length != undefined && node.fields.length != null
+				&& node.fields.length > 0) {
+			for (i = 0; i < node.fields.length; i++) {
+				// doc+='<dd>'
+				doc += '<tr bgcolor="WhiteSmoke">'
+				// +getSymbols(node.fields[i])
+							+ '<td align=\"left\" valign=\"middle">';
+							if(node.fields[i].isPk=="true")
+								doc+='<u>' +node.fields[i].name +'</u>';
+							else
+								doc+=node.fields[i].name;
+							
+						doc+= '</td>' 
+							+ '<td align=\"center\" valign=\"middle\">' + node.fields[i].type + '</td>' 
+							+ '<td align=\"center\" valign=\"middle\">' + insertOkIcon(node.fields[i].isPrivate) + '</td>'
+							+ '<td align=\"center\" valign=\"middle\">' + insertOkIcon(node.fields[i].isProtected)+ '</td>' 
+							+ '<td align=\"center\" valign=\"middle\">' + insertOkIcon(node.fields[i].isPublic) + '</td>'
+							+ '<td align=\"center\" valign=\"middle\">' + insertOkIcon(node.fields[i].isStatic)+ '</td>' 
+							+ '<td align=\"center\" valign=\"middle\">' + insertOkIcon(node.fields[i].isFinal) + '</td>'
+							+ '<td align=\"center\" valign=\"middle\">' + insertOkIcon(node.fields[i].isInherited) + '</td>'
+							+ '<td align=\"center\" valign=\"middle\">'
+								+ '<select id=\"'+node.fields[i].name+'cmp\">'
+									+ '<option>==</option>'
+									+ '<option>></option>'
+									+ '<option><</option>'
+								+ '</select>'
+							+ '</td>'
+							+ '<td align=\"center\" valign=\"middle\">'
+							+ '<input type=\"text\" name=\"'+node.fields[i].name+'\">'
+							+ '</td>'
+							+'<td align=\"center\" valign=\"middle\">'
+							+'<input type=\"radio\" name=\"orderBy\" value=\"'+node.fields[i].name+'\" />'
+							+'</td>'
+						+ '</tr>';
+			}
+			doc += //'<tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td align=\"center\" valign=\"middle\">'
+				 
+				//
+				//+'</td></tr>'
+				'</table>'//alert(doc);
+				+'</td></tr>'
+				+'<tr align=\"right\"><td align="\right\">show <input type=\"text\" name=\"limit\" value=\"'+limit+'\" maxlength=\"3\" size=\"2\"> items at once</td></tr>'
+				+'<tr align=\"right\"><td >'
+				+'<input type=\"button\" value=\"select\" onClick=\'page=\"1\";sens=\"0\";showObjects(\"'+node.fqn+'\");\'>'
+				+'&nbsp;&nbsp;&nbsp;'
+				+'<input type=\"button\" value=\"insert\" onClick=\'_insert(\"'+node.fqn+'\");\'>'
+				+'&nbsp;&nbsp;&nbsp;'
+				+'</td></tr></table>'
+				+'</FORM>';
+			//alert("cc 1");
+		}
+	}
+	return doc;
+}
+function addDelSelectionArea(fqn){
+	var node = getNodeByName(listRoot, fqn);
+	 node.showSelectionArea=!node.showSelectionArea;
+	 doc=view(listRoot,'');
+	 showNewPage(doc);
+//	 document.getElementById("list").innerHTML= doc;
+}
+function addClassMetadata(node, doc) {
+	if (node.fields != undefined && node.fields != null) {
+		doc +='<br><table border=\"1\" cellpadding=\"3\"  frame=\"box\" rules=\"rows\" >'
+				+'<tr bgcolor="LightSteelBlue">'
+					+'<th align=\"left\" valign=\"middle\">Fields</th>'
+					+'<th align=\"center\" valign=\"middle\">Type</th>'
+					+'<th align=\"center\" valign=\"middle\">Private</th>'
+					+'<th align=\"center\" valign=\"middle\">Protected</th>'
+					+'<th align=\"center\" valign=\"middle\">Public</th>'
+					+'<th align=\"center\" valign=\"middle\">Static</th>'
+					+'<th align=\"center\" valign=\"middle\">Final</th>'
+					+'<th align=\"center\" valign=\"middle\">Inherited</th>'
+					+'<th><input type=\"button\"  value=\">>\" onClick=\'addDelSelectionArea(\"'+node.fqn+'\");\'></th>'
+				+'</tr>';
+		if (node.fields.length != undefined && node.fields.length != null
+				&& node.fields.length > 0) {
+			for (i = 0; i < node.fields.length; i++) {
+				doc += '<tr bgcolor="WhiteSmoke">'
+						+'<td align=\"left\" valign=\"middle">';
+						if(node.fields[i].isPk=="true")
+							doc+='<u>' +node.fields[i].name +'</u>';
+						else
+							doc+=node.fields[i].name;
+					doc+= '</td>' 
+						+ '<td align=\"center\" valign=\"middle\">' + node.fields[i].type + '</td>' 
+						+ '<td align=\"center\" valign=\"middle\">' + insertOkIcon(node.fields[i].isPrivate) + '</td>'
+						+ '<td align=\"center\" valign=\"middle\">' + insertOkIcon(node.fields[i].isProtected)+ '</td>' 
+						+ '<td align=\"center\" valign=\"middle\">' + insertOkIcon(node.fields[i].isPublic) + '</td>'
+						+ '<td align=\"center\" valign=\"middle\">' + insertOkIcon(node.fields[i].isStatic)+ '</td>' 
+						+ '<td align=\"center\" valign=\"middle\">' + insertOkIcon(node.fields[i].isFinal) + '</td>'
+						+ '<td align=\"center\" valign=\"middle\">' + insertOkIcon(node.fields[i].isInherited) + '</td>'
+						+'<td></td>'
+				+ '</tr>';
+			}
+			//	+'<input type=\"button\" value=\"select\" onClick=\'hideShowObjects(\"'+node.fqn+'\");\'>' 
+				//
+			//	
+			//doc+='<tr><td>&nbsp;</td></tr>';
+				doc+='</table><br>';
+		}
+	}
+	return doc;
+}
+var filter="";
+var limit=10;
+var sens=0;
+var orderBy="";
+var resultMin=0;
+var resultMax=0;
+function createGetUrl(fqn){
+//	alert("hideShowObjects "+fqn);
+	
+	var node = getNodeByName(listRoot, fqn);
+	//	alert("creating getUrl for"+fqn);
+
+limit=document.forms["select"+fqn].elements["limit"].value;
+var index=document.forms["select"+fqn].elements["orderBy"].selectedIndex;
+var i;
+if(sens==0){
+	for (i=0;i<node.fields.length;i++){
+		  if(document.forms["select"+fqn].orderBy[i].checked){
+			  orderBy=document.forms["select"+fqn].orderBy[i].value;
+		  }
+		}
+}
+resultMin=(page-1)*limit;
+resultMax=resultMin*1+limit*1;
+alert("page="+page+"\nlimit="+limit+"resultMin="+resultMin+"\nresultMax="+resultMax);
+var getUrl="";
+var i=0;
+var eltValue;
+if(sens==0){
+	for(i=0;i<node.fields.length;i++){
+		eltValue=document.forms["select"+fqn].elements[node.fields[i].name].value;
+		var crtieria="";
+		if(eltValue!=undefined && eltValue!=null && eltValue!=""){
+			var index=document.forms["select"+fqn].elements[node.fields[i].name+'cmp'].selectedIndex;
+			criteria="("
+				+node.fields[i].name
+				+document.forms["select"+fqn].elements[node.fields[i].name+'cmp'].options[index].value;
+			if(node.fields[i].type=="java.lang.String") criteria+="\""+eltValue+"\"";
+			else criteria+=eltValue;
+				criteria+=")";
+			//alert("criterion "+criteria);
+			if(filter=="") filter+=criteria;
+			else filter+=" && "+criteria;
+		}
+	}
+}
+//	filter='\"'+filter+'\"';
+	//alert("get filter:" + filter);
+	//if(filter=="") getUrl="dn/"+fqn; 
+	//else getUrl="dn/"+fqn+"?"+escape(filter);
+	getUrl=""
+		+"fqn="+fqn
+		+"&filter="+escape(filter)
+		+"&orderBy="+orderBy
+		+"&limit="+limit
+		+"&sens="+sens
+	    +"&resultMin="+resultMin
+	    +"&resultMax="+resultMax;
+	getUrl="ObjectListing?"+getUrl;
+//	alert("get url:" + getUrl);
+	return getUrl;
+ //   alert(filter+"\n"+escape(filter));
+	//alert(document.forms["select"].elements[node.fields[0].name+'cmp'].value);
+}
+function switchColor(color){
+	if (color=="WhiteSmoke")
+		return "#DCDCDC";
+		return "WhiteSmoke";
+	
+	
+}
+var size=0;
+var page=1;
+function jsonObjectList2HtmlTable(objects,fqn,res){
+
+	color="WhiteSmoke";
+	var node = getNodeByName(listRoot, fqn);
+//	var limit=document.forms["select"+fqn].elements["limit"].value;
+	if(sens==0)	{
+		size=objects[objects.length-1].size;
+		objects.length=size;
+		}
+	//alert("size,limit,size/limit: "+size+","+limit+","+size/limit);
+	if(page==1) res+='<input type=\"button\" disabled value=\"<\">';
+	else
+	res+='    <input type=\"button\" value=\"<\" onClick=\"page=page/1-1;sens=\'-\';showObjects(\''+fqn+'\');\">';
+	res+='&nbsp;&nbsp;&nbsp;page<select onChange=\"page=this.value;sens=\'+\';showObjects(\''+fqn+'\');\">';
+	for(var i=1;i<=size/limit;i++){
+		if(i==page) res+= '<option selected value=\"'+i+'\">'+i+'</option>';
+		else res+= '<option value=\"'+i+'\">'+i+'</option>';
+	}
+	res+='</select> of '+(i-1);
+	if(page==i-1) res+='&nbsp;&nbsp;&nbsp;<input type=\"button\" disabled value=\">\" onClick=\"sens=\'+\';showObjects(fqn)\"><br>'
+	else
+		res+='&nbsp;&nbsp;&nbsp;<input type=\"button\" value=\">\" onClick=\"page=page/1+1;sens=\'+\';showObjects(\''+fqn+'\');\"><br>';
+    res+='<table border=\"1\" cellpadding=\"5\" cellspacing=\"1\" frame=\"border\" rules=\"rows\" >'
+	+'<tr bgcolor=\"LightSteelBlue\">'
+	+'<th></th><th>&nbsp;</th>';
+	var i=0;
+	var pkName;
+	var pkVal;
+	//alert("start");
+	for(i=0;i<node.fields.length;i++){
+		res+='<th align=\"center\" valign=\"middle\">'+node.fields[i].name+'</th>';
+		if(node.fields[i].isPk=="true") pkName=node.fields[i].name;
+	}
+	//alert("pk is"+pkName);
+	//alert("oui");
+	if(pkName==undefined || pkName==null) alert("Primary Key value cannot be determined for this object!");
+	res+='</tr>';
+	for(i=0;i<objects.length && i<limit;i++){
+		pkVal=eval("objects[i]."+pkName);
+		res+='<tr bgcolor=\"'+color+'\">';
+		res+='<td>'
+				+'<button type=\"button\" onClick=\'edit(\"\");\'><img src=\"icons/edit.jpg\"/></button>'
+			+'</td>'
+			+'<td>'
+				+'<button type=\"button\" onClick=\'_delete(\"'+node.fqn+'\",\"'+pkVal+'\");\'><img src=\"icons/delete.jpg\"/></button>'
+			+'</td>';
+		for(j=0;j<node.fields.length;j++){
+			var attribut=objects[i];
+			res+='<td>'+eval("attribut."+node.fields[j].name)+'</td>';
+		}
+		res+='</tr>';
+		color=switchColor(color);
+	}
+	res+='</table>';
+	//alert(res);
+	return res;
+}
+function _insert(fqn){
+	var newObject=createInsertObject(fqn);
+	var node=getNodeByName(listRoot, fqn);
+	//newObject=escape(newObject);
+	$.ajax({
+		url : 'dn/'+fqn,
+		type: 'POST',
+		dataType : 'json',
+		data: newObject,
+		timeout : 3000,
+		success : function(feed) {
+			//jsonObjectsList=feed;
+			//var x = feed;
+//			alert(feed);
+			//document.write(feed);
+			//alert("showObjects success");
+			node.showObjects=false;
+			doc="";
+			doc= view(listRoot, doc);	
+			showNewPage(doc);
+//			document.getElementById("list").innerHTML= doc;
+		}
+	});
+//	alert("fin ajax");
+
+
+}
+function createInsertObject(fqn){
+	var node = getNodeByName(listRoot, fqn);
+	var jsonString="{";
+	var i=0;
+	var attributeValue;
+	var attributeName;
+	for(i=0;i<node.fields.length;i++){
+		if(jsonString!="{") jsonString+=',';
+		attributeName=node.fields[i].name;
+		attributeValue=document.forms["select"+fqn].elements[attributeName].value;
+		if(attributeValue!=undefined && attributeValue!=null ){
+			jsonString+='\"'+attributeName+'\"'+':'+'\"'+attributeValue+'\"';	
+		}
+	}
+	jsonString+="}";
+	alert(jsonString);
+	return jsonString;	
+}
+function _delete(fqn,pkVal){
+	var deleteUrl='dn/'+fqn+'/'+escape(pkVal);
+	alert("delete url was:"+deleteUrl);
+	$.ajax({
+		url : deleteUrl,
+		type: 'DELETE',
+		dataType : 'text',
+	//	data: newObject,
+		timeout : 3000,
+		success : function(feed) {
+			alert("deleted!");
+			//jsonObjectsList=feed;
+			//var x = feed;
+//			alert(feed);
+			//document.write(feed);
+			//alert("showObjects success");
+		//	node.showObjects=false;
+		//	doc="";
+		//	doc= view(listRoot, doc);	
+		//	showNewPage(doc);
+//			document.getElementById("list").innerHTML= doc;
+		}
+	});	
+	alert("delete url was:"+deleteUrl);
+}
+function _update(){
+	
+}
+//$.ajaxSetup({cache: false}); 
+
+function showObjects(fqn){
+//	alert("showObjects start");
+	var node = getNodeByName(listRoot, fqn);
+	//node.showObjects=!node.showObjects;
+	node.showObjects=true;
+	var getUrl=createGetUrl(fqn);
+//	alert(getUrl);
+//	alert("url "+getUrl);
+	//getUrl=escape(getUrl);
+//	alert("final url "+ unescape(getUrl));
+	$.ajax({
+		url : getUrl,
+	//	cache: false,
+		type : 'GET',
+		dataType : 'json',
+		
+	//	 data: new Date(),
+		timeout : 3000,
+		success : function(feed) {
+		//	alert("seccess");
+			jsonObjectsList=feed;
+		//	alert(feed);
+			//var x = feed;
+			//alert(feed);
+			//document.write(feed);
+			//alert("showObjects success");
+			doc="";
+			doc= view(listRoot, doc);
+		//	if(node.showObjects) 
+			
+			//document.write(doc);
+			// document.writeln("start");
+//			
+			showNewPage(doc);
+//			document.getElementById("list").innerHTML= doc;
+			node.showObjects=false;
+		}
+	});
+//	alert("fin ajax");
+}
+function isOpened(node){
+	if (node.fils != undefined && node.fils != null) {
+		if (node.fils.length != undefined && node.fils.length != null && node.fils.length > 0) {
+			for (i = 0; i < node.fils.length; i++) {
+				if(node.fils[i].isVisible) return true;
+				else 
+				//	{alert(node.label+" is not opened because "+node.fields[i].label+" is invisible");
+					return false;
+				//	}
+			}
+		} else {
+			if(node.fils.isVisible) return true;
+			else 
+			//{alert(node.label+" is not opened because "+node.fields.label+" is invisible");
+			return false;
+			//}
+		}
+	}
+//	alert(node.label+" is not opened because it dosen't have any child");
+	return false;
+}
+function showChildren(nodeFqn) {
+	var node = getNodeByName(listRoot, nodeFqn);
+	if (node == undefined || node == null) {
+		alert("erreur getNodeByName");
+		return;
+	}
+	if (node.isClass) {
+		if (node.showMetadata) {
+			node.showMetadata = false;
+			node.showSelectionArea=false;
+			node.showObjects=false;
+		} else {
+			node.showMetadata = true;
+		}
+		doc = "";
+		doc = view(listRoot, doc);
+		showNewPage(doc);
+		
+		//document.getElementById("list").innerHTML = doc;
+
+		return;
+	}
+//	alert(document.getElementByName(nodeFqn).value);
+	//var val = $('input:hidden[name=' + nodeFqn + ']').val();
+	//if (val != undefined && val != null) {
+	//	if (val == "+") {// alert(valeur);
+	//	alert(node.label+" was opened ?"+isOpened(node));
+		if(isOpened(node)==false){
+			setChildrensVisibility(node, true);
 		}
 		else{
-			$('input:button[name='+nodeFqn+']').val("+");
+	//	} else {
+			setChildrensVisibility(node, false);
 		}
-		*/
-	}
-	else alert("valeur indéfinie");
-	return;
-}
-function initAffichgeArbre(root){
-	if(root.length>0) {
-		tree[treeI]=Array();
-		// c une suite d_elements , donc affichage un par un
-		for(j=0;j<root.length;j++){
-			initAffichgeArbre(root[j]);treeI++;tree[treeI]=Array();
-		}
-			return;
+	//	alert(node.label+" is now opened ?"+isOpened(node));
+		doc = "";
 		
-	}
-	if(root.label!=undefined){
-		tree[treeI][treeJ]=Array();
-		tree[treeI][treeJ][0]=root.label;
-		tree[treeI][treeJ][1]=0;
-		document.write(treeI+"."+treeJ+root.label+"<br>");
-		if (root.isClass=="true") { return;
-//		document.write("is a class");
-			}
-		//afficher(root.children);
-	}
-		//cas d_un arbre donc affichage des noeuds
-	if( root.children!=undefined && root.children!=null){
-		treeJ++;  
-		initAffichgeArbre(root.children);
-	}
-	return;	
-}
-function afficher(root){
-//	document.write("affiche");
+		doc = view(listRoot, doc);
+		//alert(doc);
+		showNewPage(doc);
+		//document.getElementById("list").innerHTML = doc;
+		//doc="cc";
+	//	var longueurCible = document.getElementById("list").firstChild.rl;//.length;
+	//	var oldChild=document.getElementsByName("list").item(0);
+	//	var newChild= document.createTextNode("cc");
+//		newChild.data=doc;
+	//	document.removeChild(oldChild);
+	//	alert(oldChild);
 	
-	if(root.length>0) {
-		// c une suite d_elements , donc affichage un par un
-		for(j=0;j<root.length;j++)
-			afficher(root[j]);
-			return;
-	}treeI++;
-	if(root.label!=undefined && tree[treeI][treeJ][1]==1){
-		//treeI++;
-		for(i=0;i<treeJ;i++){
-			document.write("&nbsp;");
-		}
-		//document.write(root.label);
-//<button name="cliquemoi" type="button"
-//  value="" onClick="self.content.document.body.setAttributeNS("cliquemoi", "value", -)" style="font-size:3mm; padding: 0%;">
- 		document.write("<input type=\"button\" name=\""+treeI+"."+treeJ+"\""+"value=\"\" onclick=\"showChildren("+treeI+","+treeJ+")\" \"style=\"font-size:3mm; padding: 0%; \">+</input> "+treeI+"."+treeJ+"."+root.label+"&nbsp;");
-
-		//document.write(treeI+"."+treeJ+"."+root.label+"&nbsp;");
-		if (root.isClass=="true") {
-		document.write("is a class");
-			}
-		//afficher(root.children);
-		document.write("<br>");
-	}
-		//cas d_un arbre donc affichage des noeuds
-	if( root.children!=undefined && root.children!=null){
-		treeJ++; 
-		afficher(root.children);
-	}
+	//	var newChild= HTMLParagraphElement();
+	//	alert(oldChild);
+	//	alert(newChild);
+	//	document.removeChild(oldChild);
+		//newChild.data="cc";
+	//	document.body.appendChild(newChild);
+//		document.replaceChild(newChild, oldChild);
+	//	alert(newChild);
+	//	oldChild.replaceChild(newChild, oldChild);
+		//document.getElementsByName("").item(1).replaceChild(newChild, oldChild)
+		//document.replaceChild(newChild, oldChild);
+		//alert(longueurCible);
+	//	document.getElementById("list").firstChild.replaceData(0, longueurCible, doc);
+	//} else
+	//	alert("valeur indéfinie");
 	return;
 }
-
-
+function showNewPage(doc){
+document.body.innerHTML=doc;
+		//'<!DOCTYPE html PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\" \"http://www.w3.org/TR/html4/loose.dtd\">'
+	//	+
+		/*	'<html>'
+			+'<head>'
+				+'<meta http-equiv=\"Content-Type\" content=\"text/html; charset=ISO-8859-1\">'
+				+'<title>JDO Administrator</title>'
+			+'</head>'
+			+'<body>'
+				+'<H2 align=\"center\">JDO Administator</H2>'
+				+'<br>'
+				+'<p id=\"list\" name=\"list\">' 
+					+doc
+				+'</p>'
+			+'<script type="text/javascript" src="jquery.min.js"></script>'
+			+'<script type="text/javascript" src="treeHandler.js"></script>'
+			+'<!--<script type="text/javascript" src="json.as"></script>-->'
+		+'</body>'
+		+'</html>');
+		*/
+	
+}
+start();

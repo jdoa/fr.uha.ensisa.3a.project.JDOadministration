@@ -19,7 +19,7 @@ public class Book extends Product
 	@Persistent
     protected String isbn=null;
 	@Persistent
-    protected String publisher=null;
+    protected  String publisher=null;
 	
     protected Book()
     {

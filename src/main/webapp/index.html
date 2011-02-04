@@ -1,44 +1,25 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<meta http-equiv='cache-control' content='no-cache'> 
+<meta http-equiv='expires' content='0'> 
+<meta http-equiv='pragma' content='no-cache'> 
 
-<title>AdministrateurJDO</title>
+ 
+
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"/>
+
+
+<title>JDO Administrator</title>
 </head>
 <body>
-<H2 align="center">Administrateur JDO</H2>
+<H2 align="center">JDO Administator</H2>
 <br>
-<br>
-<p id="list"> </p>
+<p id="list" name="list"> </p>
 <script type="text/javascript" src="jquery.min.js"></script>
 <script type="text/javascript" src="treeHandler.js"></script>
-<script type="text/javascript">
-var tree,treeI=0,treeJ=1;
-var listRoot=new Node("Package list",null);
-listRoot.isVisible=true;
-var doc="";
-//document.writeln("salut");
-$.ajax({
-	  url: 'ClassListing',
-	  dataType: 'json',
-	  //data: data,
-	  timeout: 3000,
-	  success: function(feed) {  	
-	  	var x=feed;
-	  //	document.writeln("start");
-	  	json2node(x,listRoot);
-	    //document.writeln("json2node success");
-		generateFqn(listRoot);
-		//document.writeln("generateFqn success");
-		doc=view(listRoot,doc);
-		//document.writeln("view success");
-		//alert(doc);
-		document.getElementById("list").innerHTML = doc;
-		//document.write(list);
-		
-	  }
-});
-//document.write("end");
-</script>
+
+<!--<script type="text/javascript" src="json.as"></script>-->
+
 </body>
 </html>

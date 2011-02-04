@@ -3,11 +3,8 @@ package servlets;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashSet;
 
 import javax.servlet.ServletException;
@@ -15,11 +12,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import net.sf.json.util.JSONBuilder;
-
-import org.json.JSONObject;
-
-import persistence.utils.PersistenceHelper;
 import servlets.utils.JsonHelper;
 import servlets.utils.ReflexionHelper;
 
@@ -28,7 +20,8 @@ import servlets.utils.ReflexionHelper;
 public class ClassListing extends HttpServlet {
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse res)
-			throws ServletException, IOException {	
+			throws ServletException, IOException {
+		
 		res.setContentType("jsonp");
 //		res.setContentType("text/x-json");
 		Connection con = null;
@@ -64,6 +57,8 @@ public class ClassListing extends HttpServlet {
 			//out.print(jsonRep);
 			out.flush();
 			out.close();
+			System.out.println("filter :"+req.getParameter("filter"));
+			System.out.println("limit :"+req.getParameter("limit"));
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

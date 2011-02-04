@@ -17,19 +17,24 @@ import javax.jdo.annotations.PrimaryKey;
 
 import org.apache.commons.beanutils.PropertyUtils;
 
-import servlets.utils.TreeNode;
-
 import persistence.model.Product;
 
 public class PersistenceHelper {
+	public static PersistenceHelper instance=null;
 	private PersistenceManagerFactory pmf;
 	private PersistenceManager pm;
 	private Transaction tx;
-	public PersistenceHelper(String parametersFile){
+	public static int cnt=0;
+	private PersistenceHelper(String parametersFile){
 		pmf=JDOHelper.getPersistenceManagerFactory(parametersFile);
 		pm=pmf.getPersistenceManager();
 		tx=pm.currentTransaction();
 //		tx.begin();
+	}
+	public static  synchronized PersistenceHelper getInstance(String parametersFile){
+		if (instance==null)					
+			instance=new PersistenceHelper(parametersFile);			
+		return instance;					
 	}
 
 	public void persist(Object o,Class T ){
@@ -43,7 +48,7 @@ public class PersistenceHelper {
 	        }
 	        finally
 	        {
-	          //  closeTransaction(tx);
+	            closeTransaction(tx);
 	        }
 	}
 
@@ -58,7 +63,7 @@ public class PersistenceHelper {
             ArrayList list = new ArrayList();
             while(it.hasNext())
             	list.add(it.next());
-   //         tx.commit();
+            tx.commit();
             return list;
         }
         catch (Exception e)
@@ -67,7 +72,7 @@ public class PersistenceHelper {
         }
         finally
         {
- //          closeTransaction(tx);
+           closeTransaction(tx);
         }
 		return null;
 	}
@@ -79,7 +84,7 @@ public class PersistenceHelper {
 		if (c.getSuperclass()== c) return null;
 		return getIdField(c.getSuperclass());
 	}
-	private ArrayList<Field> getAllDeclaredFields(Class<?> c){
+	public ArrayList<Field> getAllDeclaredFields(Class<?> c){
 		// returns the list of declared fields  in the class and in it's superclass
 		ArrayList<Field> fieldList= new ArrayList<Field>();
 		if( c.getSuperclass()!=null && c.getSuperclass()!=c)
@@ -121,7 +126,7 @@ public class PersistenceHelper {
 	    }
 	    finally
         {
-        	//closeTransaction(tx);
+        	closeTransaction(tx);
         }
 	}
 	public void update(Object o,Class<?> T,String idName, String att,Class attType,Object newVal) {
@@ -166,10 +171,33 @@ public class PersistenceHelper {
 	       	}
 	    finally
         {
-        	//closeTransaction(tx);
+        	closeTransaction(tx);
         }
 	}
 
+	public List getInstancesWhere(Class className,String filter,String orderBy,long resultMin,long resultMax){
+		PersistenceManager pm=pmf.getPersistenceManager();
+		Transaction tx=pm.currentTransaction(); 
+		ArrayList list=new ArrayList();
+		try
+	        {
+	            tx.begin();
+	            Extent e=pm.getExtent(className,false);
+	            Query q=pm.newQuery(e, filter);
+	            if(orderBy!=null && !orderBy.isEmpty()) q.setOrdering(orderBy);
+	            q.setRange(resultMin, resultMax);
+	            Collection c=(Collection)q.execute();
+	            tx.commit();
+	            Iterator it=c.iterator();
+	            while(it.hasNext())
+	            	list.add(it.next());   
+	        }
+	        finally
+	        {
+	            closeTransaction(tx);
+	        }
+		return  list;
+	}
 	public List getInstancesWhere(Class className,String filter,String orderBy){
 		PersistenceManager pm=pmf.getPersistenceManager();
 		Transaction tx=pm.currentTransaction(); 
@@ -177,25 +205,22 @@ public class PersistenceHelper {
 		try
 	        {
 	            tx.begin();
-
 	            Extent e=pm.getExtent(className,false);
 	            Query q=pm.newQuery(e, filter);
 	            if(orderBy!=null && !orderBy.isEmpty()) q.setOrdering(orderBy);
 	            Collection c=(Collection)q.execute();
-	 //           tx.commit();
+	            tx.commit();
 	            Iterator it=c.iterator();
 	            while(it.hasNext())
-	            	list.add(it.next());
-	            
+	            	list.add(it.next());   
 	        }
 	        finally
 	        {
-	      //      closeTransaction(tx);
+	            closeTransaction(tx);
 	        }
-		
 		return  list;
-		
 	}
+
 /*	public void printResultList(Collection c,PrintWriter out){
         Iterator iter = c.iterator();
         while (iter.hasNext())
@@ -237,7 +262,7 @@ public class PersistenceHelper {
 	        }
 	        finally
 	        {
-	     //      closeTransaction(tx);
+	           closeTransaction(tx);
 	        }
 	        return n;
 	}
@@ -255,7 +280,7 @@ public class PersistenceHelper {
 	        }
 	        finally
 	        {
-	       //    closeTransaction(tx);
+	           closeTransaction(tx);
 	        }
 	        return n;
 	}

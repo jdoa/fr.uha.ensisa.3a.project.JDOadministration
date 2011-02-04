@@ -68,14 +68,14 @@
 			<artifactId>datanucleus-rdbms</artifactId>
 			<version>2.2.2</version>
 			<type>jar</type>
-			<scope>compile</scope>
+			<scope>runtime</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.datanucleus</groupId>
 			<artifactId>datanucleus-core</artifactId>
 			<version>2.2.2</version>
 			<type>jar</type>
-			<scope>compile</scope>
+			<scope>runtime</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.wicketstuff</groupId>
@@ -129,16 +129,6 @@
 				</executions>
 			</plugin>
 			<plugin>
-				<groupId>org.datanucleus</groupId>
-				<artifactId>maven-datanucleus-plugin</artifactId>
-				<version>2.2.0-release</version>
-				<configuration>
-					<props>datanucleus.properties</props>
-					<metadataExcludes>servlets*</metadataExcludes>
-				    <metadataIncludes>*persistence*/model/*.class </metadataIncludes>
-				</configuration>
-			</plugin>
-			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>exec-maven-plugin</artifactId>
 				<version>1.2</version>
@@ -150,6 +140,16 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>2.3.2</version>
+			</plugin>
+			<plugin>
+				<groupId>org.datanucleus</groupId>
+				<artifactId>maven-datanucleus-plugin</artifactId>
+				<version>2.2.1</version>
+				<configuration>
+					<props>datanucleus.properties</props>
+					<metadataExcludes>*servlets*/*.class</metadataExcludes>
+					<metadataIncludes>**/*.class </metadataIncludes>
+				</configuration>
 			</plugin>
 		</plugins>
 		<finalName>jdo-administration</finalName>

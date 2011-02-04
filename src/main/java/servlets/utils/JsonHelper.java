@@ -5,15 +5,12 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
 
 import javax.jdo.annotations.PersistenceCapable;
+import javax.jdo.annotations.PrimaryKey;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 public class JsonHelper {
 	public static JSONObject tab=null;
 	
@@ -30,24 +27,34 @@ public class JsonHelper {
 			fqn=it.next();
 			Boolean isPersistent=Class.forName(fqn).isAnnotationPresent(PersistenceCapable.class);
 			if(!isPersistent) continue;
-			System.out.println("fqn =>"+ fqn);
+		//	System.out.println("fqn =>"+ fqn);
 			TreeNode metadata=new TreeNode("class.fields.metadata");
-			for (Field f : Class.forName(fqn).getDeclaredFields()) {
-					if(f.getName().startsWith("jdo")) continue;
-					int mod=f.getModifiers();
-					TreeNode desc=new TreeNode("field.metadata");
-      				desc.addAttribute("name", f.getName());
-					desc.addAttribute("type", f.getType().getName());
-					desc.addAttribute("isReadable", bool2Str(Modifier.isPublic(mod)));
-					desc.addAttribute("isFinal", bool2Str(Modifier.isFinal(mod)));
-					desc.addAttribute("isPrivate", bool2Str(Modifier.isPrivate(mod)));
-					desc.addAttribute("isProtected", bool2Str(Modifier.isProtected(mod)));
-					desc.addAttribute("isStatic", bool2Str(Modifier.isStatic(mod)));
-					metadata.addChild(desc);
-				};
+				Class<?> superClass = Class.forName(fqn);
+				Boolean isInherited=false;
+				Boolean isPk=false;
+				while(superClass!=java.lang.Object.class){
+					for (Field f : superClass.getDeclaredFields()) {
+						if(f.getName().startsWith("jdo")) continue;
+						int mod=f.getModifiers();
+						TreeNode desc=new TreeNode("field.metadata");
+	      				desc.addAttribute("name", f.getName());
+						desc.addAttribute("type", f.getType().getName());
+						desc.addAttribute("isPublic", bool2Str(Modifier.isPublic(mod)));
+						desc.addAttribute("isFinal", bool2Str(Modifier.isFinal(mod)));
+						desc.addAttribute("isPrivate", bool2Str(Modifier.isPrivate(mod)));
+						desc.addAttribute("isProtected", bool2Str(Modifier.isProtected(mod)));
+						desc.addAttribute("isStatic", bool2Str(Modifier.isStatic(mod)));
+						desc.addAttribute("isInherited", bool2Str(isInherited));
+						if(f.isAnnotationPresent(PrimaryKey.class)) isPk=true;
+						else isPk=false;
+						desc.addAttribute("isPk", bool2Str(isPk));
+						metadata.addChild(desc);
+					};
+					superClass=superClass.getSuperclass();
+					isInherited=true;
+				}
 			int i=0;
 			String[] tab=fqn.split("\\.");
-		//	System.out.println("cette classe est directement inseree sous route"+ fqn +" taille :"+tab.length);
 			if (tab.length==0) {
 				System.out.println("cette classe est directement inseree sous route"+ fqn);
 				child=new TreeNode(fqn);
@@ -62,8 +69,11 @@ public class JsonHelper {
 				while(packageTree.size()>0){
 	   				    child = start.findChild(packageTree.get(0));
 	   					if(child==null) {
-	   						child=new TreeNode(packageTree.get(0));
-	   						if(packageTree.size()==1) child.addChild(metadata);
+	   						if(packageTree.size()==1){
+	   							child=new TreeNode(fqn);
+	   							child.addChild(metadata);
+	   						}
+	   						else child=new TreeNode(packageTree.get(0));
 	   						start.addChild(child);
 	   					}
 	   					start=child;
@@ -81,7 +91,7 @@ public class JsonHelper {
 		if( b) return "true"; 
 		return "false";
 	}
-    public static void tree2Json(TreeNode arbre,JSONObject tableau) throws JSONException{
+    public static void tree2Json(TreeNode arbre,JSONObject tableau) throws JSONException, ClassNotFoundException{
     	//Iterator<TreeNode> it = arbre.findChildren();
     	//if (!it.hasNext()) return;
 		TreeNode node=arbre;
@@ -94,17 +104,21 @@ public class JsonHelper {
 				tableau.put("label", node.getName());
     			if (node.findChildren()!=null && TreeNode.class.cast(node.findChildren().next()).getName().compareTo("class.fields.metadata")==0){
     				tableau.put("isClass", "true");
+    				//child.addAttribute("superClass",Class.forName(fqn).getSuperclass().getName());
+    				tableau.put("superClass",Class.forName(node.getName()).getSuperclass().getName());
     				Iterator<TreeNode> iter=TreeNode.class.cast(node.findChildren().next()).findChildren();
     				while(iter.hasNext()){
     					TreeNode fieldMetadata= iter.next();
     					JSONObject att=new JSONObject();
     	    			att.put("name",fieldMetadata.findAttribute("name"));
-    	    			//att.put("type",fieldMetadata.findAttribute("type"));
-    	    			//att.put("isPublic",fieldMetadata.findAttribute("isPublic"));
-    	    			//att.put("isPrivate",fieldMetadata.findAttribute("isPrivate"));
-    	    			//att.put("isProtected",fieldMetadata.findAttribute("isProtected"));
-    	    			//att.put("isStatic",fieldMetadata.findAttribute("isStatic"));
-    	    			//att.put("isFinal",fieldMetadata.findAttribute("isFinal"));
+    	    			att.put("type",fieldMetadata.findAttribute("type"));
+    	    			att.put("isPublic",fieldMetadata.findAttribute("isPublic"));
+    	    			att.put("isPrivate",fieldMetadata.findAttribute("isPrivate"));
+    	    			att.put("isProtected",fieldMetadata.findAttribute("isProtected"));
+    	    			att.put("isStatic",fieldMetadata.findAttribute("isStatic"));
+    	    			att.put("isFinal",fieldMetadata.findAttribute("isFinal"));
+    	    			att.put("isInherited",fieldMetadata.findAttribute("isInherited"));
+    	    			att.put("isPk",fieldMetadata.findAttribute("isPk"));
     	    			tableau.accumulate("fields", att);
     				}
     			}

@@ -8,6 +8,10 @@
     	<servlet-name>ClassListing</servlet-name>
     	<servlet-class>servlets.ClassListing</servlet-class>
     </servlet>
+     <servlet>
+    	<servlet-name>ObjectListing</servlet-name>
+    	<servlet-class>servlets.ObjectListing</servlet-class>
+    </servlet>
     <servlet>
         <servlet-name>DataNucleus</servlet-name>
         <servlet-class>org.datanucleus.rest.RestServlet</servlet-class>
@@ -24,6 +28,10 @@
         <servlet-name>ClassListing</servlet-name>
         <url-pattern>/ClassListing/*</url-pattern>
     </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>ObjectListing</servlet-name>
+        <url-pattern>/ObjectListing/*</url-pattern>
+    </servlet-mapping>    
     <welcome-file-list>
     <welcome-file>index.html</welcome-file>
   </welcome-file-list>
