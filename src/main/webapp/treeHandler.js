@@ -391,7 +391,7 @@ function addMetaDataAndSelectionArea(node,doc){
 				+'</td></tr>'
 				+'<tr align=\"right\"><td align="\right\">show <input type=\"text\" name=\"limit\" value=\"'+limit+'\" maxlength=\"3\" size=\"2\"> items at once</td></tr>'
 				+'<tr align=\"right\"><td >'
-				+'<input type=\"button\" value=\"select\" onClick=\'page=\"1\";sens=\"0\";showObjects(\"'+node.fqn+'\");\'>'
+				+'<input type=\"button\" value=\"select\" onClick=\'resetGetParams(\"'+node.fqn+'\");\'>'
 				+'&nbsp;&nbsp;&nbsp;'
 				+'<input type=\"button\" value=\"insert\" onClick=\'_insert(\"'+node.fqn+'\");\'>'
 				+'&nbsp;&nbsp;&nbsp;'
@@ -401,6 +401,16 @@ function addMetaDataAndSelectionArea(node,doc){
 		}
 	}
 	return doc;
+}
+var currentClass="";
+function resetGetParams(fqn){
+	//if(fqn!=currentClass){
+	currentClass=fqn;
+	filter="";
+	orderBy="";
+	page=1;
+	sens=0;
+	showObjects(fqn);
 }
 function addDelSelectionArea(fqn){
 	var node = getNodeByName(listRoot, fqn);
@@ -468,8 +478,11 @@ limit=document.forms["select"+fqn].elements["limit"].value;
 var index=document.forms["select"+fqn].elements["orderBy"].selectedIndex;
 var i;
 if(sens==0){
+	if(node.fields.length==1)
+		  orderBy=document.forms["select"+fqn].orderBy.value;
+	else
 	for (i=0;i<node.fields.length;i++){
-		  if(document.forms["select"+fqn].orderBy[i].checked){
+		  if(document.forms["select"+fqn].orderBy[i].checked ){
 			  orderBy=document.forms["select"+fqn].orderBy[i].value;
 		  }
 		}
@@ -511,7 +524,7 @@ if(sens==0){
 	    +"&resultMin="+resultMin
 	    +"&resultMax="+resultMax;
 	getUrl="ObjectListing?"+getUrl;
-//	alert("get url:" + getUrl);
+	alert("get url:\n" + getUrl);
 	return getUrl;
  //   alert(filter+"\n"+escape(filter));
 	//alert(document.forms["select"].elements[node.fields[0].name+'cmp'].value);
@@ -533,9 +546,10 @@ function jsonObjectList2HtmlTable(objects,fqn,res){
 	if(sens==0)	{
 		size=objects[objects.length-1].size;
 		objects.length=size;
+		if (size==0) return res+="No result found";
 		}
 	//alert("size,limit,size/limit: "+size+","+limit+","+size/limit);
-	if(page==1) res+='<input type=\"button\" disabled value=\"<\">';
+	if(page==1 || limit >=size ) res+='<input type=\"button\" disabled value=\"<\">';
 	else
 	res+='    <input type=\"button\" value=\"<\" onClick=\"page=page/1-1;sens=\'-\';showObjects(\''+fqn+'\');\">';
 	res+='&nbsp;&nbsp;&nbsp;page<select onChange=\"page=this.value;sens=\'+\';showObjects(\''+fqn+'\');\">';
@@ -543,8 +557,11 @@ function jsonObjectList2HtmlTable(objects,fqn,res){
 		if(i==page) res+= '<option selected value=\"'+i+'\">'+i+'</option>';
 		else res+= '<option value=\"'+i+'\">'+i+'</option>';
 	}
+	if(limit >=size ) res+= '<option selected value=\"1\">1</option>'
+						 +'</select> of 1';
+	else
 	res+='</select> of '+(i-1);
-	if(page==i-1) res+='&nbsp;&nbsp;&nbsp;<input type=\"button\" disabled value=\">\" onClick=\"sens=\'+\';showObjects(fqn)\"><br>'
+	if(page==i-1 || limit >=size ) res+='&nbsp;&nbsp;&nbsp;<input type=\"button\" disabled value=\">\" onClick=\"sens=\'+\';showObjects(fqn)\"><br>';
 	else
 		res+='&nbsp;&nbsp;&nbsp;<input type=\"button\" value=\">\" onClick=\"page=page/1+1;sens=\'+\';showObjects(\''+fqn+'\');\"><br>';
     res+='<table border=\"1\" cellpadding=\"5\" cellspacing=\"1\" frame=\"border\" rules=\"rows\" >'

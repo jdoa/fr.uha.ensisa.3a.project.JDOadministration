@@ -1,10 +1,9 @@
 package tests;
 
-import java.lang.reflect.InvocationTargetException;
-
 import junit.framework.Assert;
 
 import org.junit.Test;
+
 import persistence.model.Book;
 import persistence.model.Product;
 import persistence.utils.PersistenceHelper;
