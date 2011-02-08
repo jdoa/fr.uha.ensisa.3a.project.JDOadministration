@@ -6,6 +6,8 @@ function Node(label, fils) {
 	this.superClass = null;
 	this.showMetadata = false;
 	this.showSelectionArea=false;
+	this.showUpdate=false;
+	this.showInsert=false;
 	this.showObjects=false;
 	this.fields = null;
 	this.fqn = "Package list";
@@ -204,25 +206,12 @@ function view(root, doc) { // root is a Node
 			doc += 
 						'<button  name=\"' 
 							+ root.fqn
-							//+ '\" "value=\"' + getIconVal(root)
 							+ '\" onClick=\'showChildren(\"' 
 							+ root.fqn
 							+ '\"); \' > '
-					//		'<u id=\"' + root.fqn + '\" style=\"cursor: pointer\; color:#0000FF\;\" onClick=\'showChildren(\"'
-					//		+ root.fqn
-					//	    +'\");\'> '
-					// +'<a href=\">'
 							+ root.label
-					//		+'</u>';
-					
-					//+ '</div>';
 			+ '</button>' ;
 		} else {
-			// doc+='<a
-			// href="javascript:;"onClick=\'showChildren(\"'+root.fqn+'\");\'>
-			// ';
-			
-//			doc += 
 			doc += '<div id=\"' + root.fqn + '\" style=\"cursor:pointer\;width:30px;overflow:visible;\" onClick=\'showChildren(\"'
 				+ root.fqn + '\");\'> '
 				+'<table><tr><td nowrap=\"nowrap\">'
@@ -232,18 +221,21 @@ function view(root, doc) { // root is a Node
 			if(root.isClass && root.superClass!="java.lang.Object"){
 				doc+="&nbsp; extends "+root.superClass;
 			}
-			doc+='</tr></td></table>';
-			doc += //'<input type=\"hidden\" "name=\"' + root.fqn
-				//	+ '\" " +"value=\"' + getIconVal(root)
-				//	+ '\" onClick=\'showChildren(\"' + root.fqn
-				//	+ '\");\' style=\"font-size:3mm; padding: 0%; \" /> '
-					 '</div>';
+			doc+='</tr></td></table>'
+			    +'</div>';
 			if (root.isClass ) {
 				if (root.showMetadata) {
 					doc+='<dl><dd>';
-					if(root.showSelectionArea){
+					if(root.showSelectionArea)
 						doc = addMetaDataAndSelectionArea(root, doc);
-					}else doc = addClassMetadata(root, doc);
+					else 
+						if(root.showUpdate)
+							doc= addMetaDataAndUpdateArea(root,doc);
+						else
+							if(root.showInsert)
+								doc= addMetaDataAndInsertArea(root,doc);
+							else
+								doc = addClassMetadata(root, doc);
 					if(root.showObjects){
 						doc=jsonObjectList2HtmlTable(jsonObjectsList,root.fqn,doc);
 						doc+='<br>';
@@ -252,7 +244,6 @@ function view(root, doc) { // root is a Node
 				}
 				return doc;
 			}
-
 		}
 	}
 	if (root.fils != undefined && root.fils != null) {
@@ -341,13 +332,11 @@ function addMetaDataAndSelectionArea(node,doc){
 					+'<th align=\"center\" valign=\"middle\">Static</th>'
 					+'<th align=\"center\" valign=\"middle\">Final</th>'
 					+'<th align=\"center\" valign=\"middle\">Inherited</th>'
-					+'<th><input type=\"button\"  value=\"<<\" onClick=\'addDelSelectionArea(\"'+node.fqn+'\");\'></th>'
-				//	+'<th align=\"center\" valign=\"middle\">selector</th>'
+				//	+'<th><input type=\"button\"  value=\"<<\" onClick=\'addDelSelectionArea(\"'+node.fqn+'\");\'></th>'
+					+'<th align=\"center\" valign=\"middle\"></th>'
 					+'<th align=\"center\" valign=\"middle\">value</th>'
 					+'<th align=\"center\" valign=\"middle\">order by</th>'
-					
 				+'</tr>';
-	   // onClick=' this.form.zonedetexte.value="NOUVEAU" '>
 		if (node.fields.length != undefined && node.fields.length != null
 				&& node.fields.length > 0) {
 			for (i = 0; i < node.fields.length; i++) {
@@ -389,11 +378,12 @@ function addMetaDataAndSelectionArea(node,doc){
 				//+'</td></tr>'
 				'</table>'//alert(doc);
 				+'</td></tr>'
-				+'<tr align=\"right\"><td align="\right\">show <input type=\"text\" name=\"limit\" value=\"'+limit+'\" maxlength=\"3\" size=\"2\"> items at once</td></tr>'
+				+'<tr align=\"right\"><td align="\right\">show <input type=\"text\" name=\"limit\" value=\"'+limit+'\" maxlength=\"3\" size=\"2\"> objects per page&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td></tr>'
 				+'<tr align=\"right\"><td >'
-				+'<input type=\"button\" value=\"select\" onClick=\'resetGetParams(\"'+node.fqn+'\");\'>'
-				+'&nbsp;&nbsp;&nbsp;'
-				+'<input type=\"button\" value=\"insert\" onClick=\'_insert(\"'+node.fqn+'\");\'>'
+				+'<input type=\"button\" value=\"show\" onClick=\'resetGetParams(\"'+node.fqn+'\");\'>'
+				+'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'
+				+'<input type=\"button\"  value=\"cancel\" onClick=\'addDelSelectionArea(\"'+node.fqn+'\");\'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'
+		//		+'<input type=\"button\" value=\"insert\" onClick=\'_insert(\"'+node.fqn+'\");\'>'
 				+'&nbsp;&nbsp;&nbsp;'
 				+'</td></tr></table>'
 				+'</FORM>';
@@ -402,26 +392,12 @@ function addMetaDataAndSelectionArea(node,doc){
 	}
 	return doc;
 }
-var currentClass="";
-function resetGetParams(fqn){
-	//if(fqn!=currentClass){
-	currentClass=fqn;
-	filter="";
-	orderBy="";
-	page=1;
-	sens=0;
-	showObjects(fqn);
-}
-function addDelSelectionArea(fqn){
-	var node = getNodeByName(listRoot, fqn);
-	 node.showSelectionArea=!node.showSelectionArea;
-	 doc=view(listRoot,'');
-	 showNewPage(doc);
-//	 document.getElementById("list").innerHTML= doc;
-}
-function addClassMetadata(node, doc) {
+function addMetaDataAndUpdateArea(node,doc){
 	if (node.fields != undefined && node.fields != null) {
-		doc +='<br><table border=\"1\" cellpadding=\"3\"  frame=\"box\" rules=\"rows\" >'
+		doc += '<FORM name=\"select'+node.fqn+'\">'
+			+'<table border=\"0\" frame=\"void\" rules=\"none\" >'
+			+'<tr><th></th></tr><tr><td align=\"right\">'
+			+'<br><table border=\"1\" cellpadding=\"3\"  frame=\"box\" rules=\"rows\" >'
 				+'<tr bgcolor="LightSteelBlue">'
 					+'<th align=\"left\" valign=\"middle\">Fields</th>'
 					+'<th align=\"center\" valign=\"middle\">Type</th>'
@@ -431,7 +407,164 @@ function addClassMetadata(node, doc) {
 					+'<th align=\"center\" valign=\"middle\">Static</th>'
 					+'<th align=\"center\" valign=\"middle\">Final</th>'
 					+'<th align=\"center\" valign=\"middle\">Inherited</th>'
-					+'<th><input type=\"button\"  value=\">>\" onClick=\'addDelSelectionArea(\"'+node.fqn+'\");\'></th>'
+					+'<th align=\"center\" valign=\"middle\">value</th>'
+				+'</tr>';
+		if (node.fields.length != undefined && node.fields.length != null
+				&& node.fields.length > 0) {
+			for (i = 0; i < node.fields.length; i++) {
+				doc += '<tr bgcolor="WhiteSmoke">'
+							+ '<td align=\"left\" valign=\"middle">';
+							if(node.fields[i].isPk=="true")
+								doc+='<u>' +node.fields[i].name +'</u>';
+							else
+								doc+=node.fields[i].name;
+						doc+= '</td>' 
+							+ '<td align=\"center\" valign=\"middle\">' + node.fields[i].type + '</td>' 
+							+ '<td align=\"center\" valign=\"middle\">' + insertOkIcon(node.fields[i].isPrivate) + '</td>'
+							+ '<td align=\"center\" valign=\"middle\">' + insertOkIcon(node.fields[i].isProtected)+ '</td>' 
+							+ '<td align=\"center\" valign=\"middle\">' + insertOkIcon(node.fields[i].isPublic) + '</td>'
+							+ '<td align=\"center\" valign=\"middle\">' + insertOkIcon(node.fields[i].isStatic)+ '</td>' 
+							+ '<td align=\"center\" valign=\"middle\">' + insertOkIcon(node.fields[i].isFinal) + '</td>'
+							+ '<td align=\"center\" valign=\"middle\">' + insertOkIcon(node.fields[i].isInherited) + '</td>'
+							+ '<td align=\"center\" valign=\"middle\">'
+							+ '<input type=\"text\" name=\"'+node.fields[i].name+'\">'
+							+ '</td>'
+						+ '</tr>';
+			}
+			doc += 
+				'</table>'
+				+'</td></tr>'
+				+'<tr align=\"right\"><td >'
+				+'<input type=\"button\" value=\"Save\" onClick=\'_update(\"'+node.fqn+'\");\'>'
+				+'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'
+				+'<input type=\"button\" value=\"Cancel\" onClick=\'showUpdatePreviousPage(\"'+node.fqn+'\");\'>'
+				+'</td></tr></table>'
+				+'</FORM>';
+		}
+		
+		
+	}
+	return doc;
+}
+		function test(kk){
+			var n=new Node();
+			n=kk;
+			alert(kk.length);
+			alert(kk.fqn);
+			alert(n.label);
+		}
+function addMetaDataAndInsertArea(node,doc){
+	if (node.fields != undefined && node.fields != null) {
+		doc += '<FORM name=\"select'+node.fqn+'\">'
+			+'<table border=\"0\" frame=\"void\" rules=\"none\" >'
+			+'<tr><th></th></tr><tr><td align=\"right\">'
+			+'<br><table border=\"1\" cellpadding=\"3\"  frame=\"box\" rules=\"rows\" >'
+				+'<tr bgcolor="LightSteelBlue">'
+					+'<th align=\"left\" valign=\"middle\">Fields</th>'
+					+'<th align=\"center\" valign=\"middle\">Type</th>'
+					+'<th align=\"center\" valign=\"middle\">Private</th>'
+					+'<th align=\"center\" valign=\"middle\">Protected</th>'
+					+'<th align=\"center\" valign=\"middle\">Public</th>'
+					+'<th align=\"center\" valign=\"middle\">Static</th>'
+					+'<th align=\"center\" valign=\"middle\">Final</th>'
+					+'<th align=\"center\" valign=\"middle\">Inherited</th>'
+					+'<th align=\"center\" valign=\"middle\">value</th>'
+				+'</tr>';
+		if (node.fields.length != undefined && node.fields.length != null
+				&& node.fields.length > 0) {
+			for (i = 0; i < node.fields.length; i++) {
+				doc += '<tr bgcolor="WhiteSmoke">'
+							+ '<td align=\"left\" valign=\"middle">';
+							if(node.fields[i].isPk=="true")
+								doc+='<u>' +node.fields[i].name +'</u>';
+							else
+								doc+=node.fields[i].name;
+						doc+= '</td>' 
+							+ '<td align=\"center\" valign=\"middle\">' + node.fields[i].type + '</td>' 
+							+ '<td align=\"center\" valign=\"middle\">' + insertOkIcon(node.fields[i].isPrivate) + '</td>'
+							+ '<td align=\"center\" valign=\"middle\">' + insertOkIcon(node.fields[i].isProtected)+ '</td>' 
+							+ '<td align=\"center\" valign=\"middle\">' + insertOkIcon(node.fields[i].isPublic) + '</td>'
+							+ '<td align=\"center\" valign=\"middle\">' + insertOkIcon(node.fields[i].isStatic)+ '</td>' 
+							+ '<td align=\"center\" valign=\"middle\">' + insertOkIcon(node.fields[i].isFinal) + '</td>'
+							+ '<td align=\"center\" valign=\"middle\">' + insertOkIcon(node.fields[i].isInherited) + '</td>'
+							+ '<td align=\"center\" valign=\"middle\">'
+							+ '<input type=\"text\" name=\"'+node.fields[i].name+'\">'
+							+ '</td>'
+						+ '</tr>';
+			}
+			doc += 
+				'</table>'
+				+'</td></tr>'
+				+'<tr align=\"right\"><td >'
+				+'<input type=\"button\" value=\"Create\" onClick=\'_insert(\"'+node.fqn+'\");\'>'
+				+'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'
+				+'<input type=\"button\" value=\"Cancel\" onClick=\'showInsertPreviousPage(\"'+node.fqn+'\");\'>&nbsp;'
+				+'</td></tr></table>'
+				+'</FORM>';
+		}
+	}
+	return doc;
+}
+function showInsertPreviousPage(fqn){
+	doc="";
+	var node = getNodeByName(listRoot, fqn);
+	node.showInsert=false;
+	node.showMetadata=true;
+	doc= view(listRoot,doc);
+	showNewPage(doc);
+}
+function showUpdatePreviousPage(fqn){
+	doc="";
+	var node = getNodeByName(listRoot, fqn);
+	node.showUpdate=false;
+//	node.showMetadata=true;
+	node.showSelectionArea=true;
+	node.showObjects=true;
+	doc= view(listRoot,doc);
+	showNewPage(doc);
+}
+//var currentClass="";
+function resetGetParams(fqn){
+	//if(fqn!=currentClass){
+//	currentClass=fqn;
+	filter="";
+	orderBy="";
+	page=1;
+	sens=0;
+	showObjects(fqn);
+}
+function addDelSelectionArea(fqn){
+	var node = getNodeByName(listRoot, fqn);
+     node.showCreate=false;
+	 node.showSelectionArea=!node.showSelectionArea;
+	 doc=view(listRoot,'');
+	 showNewPage(doc);
+//	 document.getElementById("list").innerHTML= doc;
+}
+function showInsertView(fqn){
+	var node = getNodeByName(listRoot, fqn);
+	node.showObjects=false;
+	node.showUpdate=false;
+	node.showSelectionArea=false;
+	node.showInsert=true;
+	node.showMetadata=true;
+	doc=view(listRoot,'');
+	showNewPage(doc);
+
+}
+function addClassMetadata(node, doc) {
+	if (node.fields != undefined && node.fields != null) {
+		doc +='<br><table border=\"0\" cellpadding=\"3\"  frame=\"void\" rules=\"rows\" >'
+				+'<tr bgcolor="LightSteelBlue">'
+					+'<th align=\"left\" valign=\"middle\">Fields</th>'
+					+'<th align=\"center\" valign=\"middle\">Type</th>'
+					+'<th align=\"center\" valign=\"middle\">Private</th>'
+					+'<th align=\"center\" valign=\"middle\">Protected</th>'
+					+'<th align=\"center\" valign=\"middle\">Public</th>'
+					+'<th align=\"center\" valign=\"middle\">Static</th>'
+					+'<th align=\"center\" valign=\"middle\">Final</th>'
+					+'<th align=\"center\" valign=\"middle\">Inherited</th>'
+				//	+'<th><input type=\"button\"  value=\">>\" onClick=\'addDelSelectionArea(\"'+node.fqn+'\");\'></th>'
 				+'</tr>';
 		if (node.fields.length != undefined && node.fields.length != null
 				&& node.fields.length > 0) {
@@ -450,14 +583,16 @@ function addClassMetadata(node, doc) {
 						+ '<td align=\"center\" valign=\"middle\">' + insertOkIcon(node.fields[i].isStatic)+ '</td>' 
 						+ '<td align=\"center\" valign=\"middle\">' + insertOkIcon(node.fields[i].isFinal) + '</td>'
 						+ '<td align=\"center\" valign=\"middle\">' + insertOkIcon(node.fields[i].isInherited) + '</td>'
-						+'<td></td>'
+					//	+'<td></td>'
 				+ '</tr>';
 			}
-			//	+'<input type=\"button\" value=\"select\" onClick=\'hideShowObjects(\"'+node.fqn+'\");\'>' 
-				//
-			//	
-			//doc+='<tr><td>&nbsp;</td></tr>';
-				doc+='</table><br>';
+				doc+='<tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td>'
+					+'<td>' 
+					+'<input type=\"button\"  value=\"show objects\" onClick=\'addDelSelectionArea(\"'+node.fqn+'\");\'>'
+					+'<br><input type=\"button\"  value=\"create object\" onClick=\'showInsertView(\"'+node.fqn+'\");\'>'
+					+'</td>'
+					+'</tr>'
+					+'</table><br>';
 		}
 	}
 	return doc;
@@ -473,8 +608,9 @@ function createGetUrl(fqn){
 	
 	var node = getNodeByName(listRoot, fqn);
 	//	alert("creating getUrl for"+fqn);
-
-limit=document.forms["select"+fqn].elements["limit"].value;
+var tmp=document.forms["select"+fqn].elements["limit"];
+if(tmp!=undefined && tmp!=null)
+	limit=document.forms["select"+fqn].elements["limit"].value;
 var index=document.forms["select"+fqn].elements["orderBy"].selectedIndex;
 var i;
 if(sens==0){
@@ -489,7 +625,7 @@ if(sens==0){
 }
 resultMin=(page-1)*limit;
 resultMax=resultMin*1+limit*1;
-alert("page="+page+"\nlimit="+limit+"resultMin="+resultMin+"\nresultMax="+resultMax);
+//alert("page="+page+"\nlimit="+limit+"resultMin="+resultMin+"\nresultMax="+resultMax);
 var getUrl="";
 var i=0;
 var eltValue;
@@ -519,22 +655,27 @@ if(sens==0){
 		+"fqn="+fqn
 		+"&filter="+escape(filter)
 		+"&orderBy="+orderBy
-		+"&limit="+limit
+		+"&limit="+"900"
 		+"&sens="+sens
 	    +"&resultMin="+resultMin
 	    +"&resultMax="+resultMax;
 	getUrl="ObjectListing?"+getUrl;
-	alert("get url:\n" + getUrl);
+//	alert("get url:\n" + getUrl);
 	return getUrl;
  //   alert(filter+"\n"+escape(filter));
 	//alert(document.forms["select"].elements[node.fields[0].name+'cmp'].value);
+}
+function createPutUrl(fqn){
+	var putUrl="";
+	putUrl=fqn+"/"+pkVal2update;
+//	alert(putUrl+"\n\n"+escape(putUrl));
+	
+	return putUrl;
 }
 function switchColor(color){
 	if (color=="WhiteSmoke")
 		return "#DCDCDC";
 		return "WhiteSmoke";
-	
-	
 }
 var size=0;
 var page=1;
@@ -545,23 +686,31 @@ function jsonObjectList2HtmlTable(objects,fqn,res){
 //	var limit=document.forms["select"+fqn].elements["limit"].value;
 	if(sens==0)	{
 		size=objects[objects.length-1].size;
-		objects.length=size;
+		alert(" sens =0 ,size:" +size);
 		if (size==0) return res+="No result found";
+		objects.length=size;
+		sens="+";
 		}
 	//alert("size,limit,size/limit: "+size+","+limit+","+size/limit);
 	if(page==1 || limit >=size ) res+='<input type=\"button\" disabled value=\"<\">';
 	else
 	res+='    <input type=\"button\" value=\"<\" onClick=\"page=page/1-1;sens=\'-\';showObjects(\''+fqn+'\');\">';
 	res+='&nbsp;&nbsp;&nbsp;page<select onChange=\"page=this.value;sens=\'+\';showObjects(\''+fqn+'\');\">';
-	for(var i=1;i<=size/limit;i++){
+	var i=1;
+	var npages;
+	var npages=size/limit;
+	npages=npages-(npages%1);
+	if((size%limit)!=0) npages++;
+	
+	for(var i=1;i<=npages;i++){
 		if(i==page) res+= '<option selected value=\"'+i+'\">'+i+'</option>';
 		else res+= '<option value=\"'+i+'\">'+i+'</option>';
 	}
 	if(limit >=size ) res+= '<option selected value=\"1\">1</option>'
 						 +'</select> of 1';
 	else
-	res+='</select> of '+(i-1);
-	if(page==i-1 || limit >=size ) res+='&nbsp;&nbsp;&nbsp;<input type=\"button\" disabled value=\">\" onClick=\"sens=\'+\';showObjects(fqn)\"><br>';
+	res+='</select> of '+npages;
+	if(page==npages || limit >=size ) res+='&nbsp;&nbsp;&nbsp;<input type=\"button\" disabled value=\">\" onClick=\"sens=\'+\';showObjects(fqn)\"><br>';
 	else
 		res+='&nbsp;&nbsp;&nbsp;<input type=\"button\" value=\">\" onClick=\"page=page/1+1;sens=\'+\';showObjects(\''+fqn+'\');\"><br>';
     res+='<table border=\"1\" cellpadding=\"5\" cellspacing=\"1\" frame=\"border\" rules=\"rows\" >'
@@ -583,7 +732,7 @@ function jsonObjectList2HtmlTable(objects,fqn,res){
 		pkVal=eval("objects[i]."+pkName);
 		res+='<tr bgcolor=\"'+color+'\">';
 		res+='<td>'
-				+'<button type=\"button\" onClick=\'edit(\"\");\'><img src=\"icons/edit.jpg\"/></button>'
+				+'<button type=\"button\" onClick=\'createUpdateView(\"'+node.fqn+'\",\"'+pkName+'\",\"'+pkVal+'\");\'><img src=\"icons/edit.jpg\"/></button>'
 			+'</td>'
 			+'<td>'
 				+'<button type=\"button\" onClick=\'_delete(\"'+node.fqn+'\",\"'+pkVal+'\");\'><img src=\"icons/delete.jpg\"/></button>'
@@ -641,12 +790,12 @@ function createInsertObject(fqn){
 		}
 	}
 	jsonString+="}";
-	alert(jsonString);
+	//alert(jsonString);
 	return jsonString;	
 }
 function _delete(fqn,pkVal){
 	var deleteUrl='dn/'+fqn+'/'+escape(pkVal);
-	alert("delete url was:"+deleteUrl);
+//	alert("delete url was:"+deleteUrl);
 	$.ajax({
 		url : deleteUrl,
 		type: 'DELETE',
@@ -667,10 +816,112 @@ function _delete(fqn,pkVal){
 //			document.getElementById("list").innerHTML= doc;
 		}
 	});	
-	alert("delete url was:"+deleteUrl);
+//	alert("delete url was:"+deleteUrl);
 }
-function _update(){
+var pkVal2update="";
+
+function createUpdateView(fqn,pkName,pkVal){
+//	alert("fqn,pkName,pKval "+fqn+"\n"+pkName+"\n"+pkVal);
+	pkVal2update=pkVal;
+	var objectToUpdate;
+	for(i=0;i<jsonObjectsList.length && i<limit;i++){
+		var eltPkVal=eval("jsonObjectsList[i]."+pkName);
+		if(eltPkVal==pkVal) 
+			{objectToUpdate=jsonObjectsList[i]; break;}
+	}
+	var node = getNodeByName(listRoot, fqn);
+	node.showObjects=false;
+	node.showSelectionArea=false;
+	node.showInsert=true;
+	node.showUpdate=true;
+	doc="";
+	doc=view(listRoot,doc);
+	showNewPage(doc);
+			for(j=0;j<node.fields.length;j++){
+				var attribut=node.fields[j];
+				document.forms["select"+fqn].elements[attribut.name].value=objectToUpdate[attribut.name];
+			}
+}
+function _update(fqn){
+//	alert("execution de update");
+	var newObject=createInsertObject(fqn);
+	var putUrl=createPutUrl(fqn);
 	
+	var node=getNodeByName(listRoot, fqn);
+	//newObject=escape(newObject);
+	$.ajax({
+		url : 'dn/'+putUrl,
+		type: 'PUT',
+		dataType : 'json',
+		data: newObject,
+		timeout : 3000,
+		success : function(feed) {
+			alert("update success");
+			//jsonObjectsList=feed;
+			//var x = feed;
+//			alert(feed);
+			//document.write(feed);
+			//alert("showObjects success");
+			node.showObjects=false;
+			doc="";
+			doc= view(listRoot, doc);	
+			showNewPage(doc);
+//			document.getElementById("list").innerHTML= doc;
+		}
+	});
+/*
+	var req = null; 
+
+	document.ajax.dyn.value="Started...";
+	if(window.XMLHttpRequest)
+		req = new XMLHttpRequest(); 
+	else if (window.ActiveXObject)
+		req  = new ActiveXObject(Microsoft.XMLHTTP); 
+
+	req.onreadystatechange = function()
+	{ 
+		document.ajax.dyn.value="Wait server...";
+		if(req.readyState == 4)
+		{
+			if(req.status == 200)
+			{
+				document.ajax.dyn.value="Received:" + req.responseText;	
+			}	
+			else	
+			{
+				document.ajax.dyn.value="Error: returned status code " + req.status + " " + req.statusText;
+			}	
+		} 
+	}; 
+	req.open("PUT", putUrl, true); 
+	req.setRequestHeader("Content-Type", "application/json"); 
+	req.send(newObject); 
+*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 }
 //$.ajaxSetup({cache: false}); 
 
@@ -746,8 +997,14 @@ function showChildren(nodeFqn) {
 			node.showMetadata = false;
 			node.showSelectionArea=false;
 			node.showObjects=false;
+			node.showUpdate=false;
+			node.showInsert=false;
 		} else {
 			node.showMetadata = true;
+			node.showSelectionArea=false;
+			node.showObjects=false;
+			node.showUpdate=false;
+			node.showCreate=false;
 		}
 		doc = "";
 		doc = view(listRoot, doc);
