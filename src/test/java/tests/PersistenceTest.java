@@ -4,8 +4,8 @@ import junit.framework.Assert;
 
 import org.junit.Test;
 
-import persistence.model.Book;
-import persistence.model.Product;
+import persistence.resources.articles.Book;
+import persistence.resources.articles.Product;
 import persistence.utils.PersistenceHelper;
 
 

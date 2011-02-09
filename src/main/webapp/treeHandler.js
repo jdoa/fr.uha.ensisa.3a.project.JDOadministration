@@ -446,13 +446,6 @@ function addMetaDataAndUpdateArea(node,doc){
 	}
 	return doc;
 }
-		function test(kk){
-			var n=new Node();
-			n=kk;
-			alert(kk.length);
-			alert(kk.fqn);
-			alert(n.label);
-		}
 function addMetaDataAndInsertArea(node,doc){
 	if (node.fields != undefined && node.fields != null) {
 		doc += '<FORM name=\"select'+node.fqn+'\">'
@@ -517,7 +510,7 @@ function showUpdatePreviousPage(fqn){
 	doc="";
 	var node = getNodeByName(listRoot, fqn);
 	node.showUpdate=false;
-//	node.showMetadata=true;
+	node.showMetadata=true;
 	node.showSelectionArea=true;
 	node.showObjects=true;
 	doc= view(listRoot,doc);
@@ -686,22 +679,26 @@ function jsonObjectList2HtmlTable(objects,fqn,res){
 //	var limit=document.forms["select"+fqn].elements["limit"].value;
 	if(sens==0)	{
 		size=objects[objects.length-1].size;
-		alert(" sens =0 ,size:" +size);
+		//alert(" sens =0 ,size:" +size);
 		if (size==0) return res+="No result found";
 		objects.length=size;
 		sens="+";
 		}
+	var npages;
+	var npages=size/limit;
+	npages=npages-(npages%1);
 	//alert("size,limit,size/limit: "+size+","+limit+","+size/limit);
 	if(page==1 || limit >=size ) res+='<input type=\"button\" disabled value=\"<\">';
 	else
 	res+='    <input type=\"button\" value=\"<\" onClick=\"page=page/1-1;sens=\'-\';showObjects(\''+fqn+'\');\">';
-	res+='&nbsp;&nbsp;&nbsp;page<select onChange=\"page=this.value;sens=\'+\';showObjects(\''+fqn+'\');\">';
+	res+='&nbsp;&nbsp;&nbsp;page<input type=\"text\" size=\"'+1+'\" value=\"'+page+'\" onkeyup=\"if(this.value>0 && this.value <='+npages+' && this.value!=page) {page=this.value/1;sens=\'+\';showObjects(\''+fqn+'\');}\">';
+	res+='of '+npages;
+	//if(npages<=1) res+='&nbsp;&nbsp;&nbsp;page<select size=\"1\" onChange=\"page=this.value;sens=\'+\';showObjects(\''+fqn+'\');\">';
+//	else  res+='&nbsp;&nbsp;&nbsp;page<select size=\"2\" onChange=\"page=this.value;sens=\'+\';showObjects(\''+fqn+'\');\">';
 	var i=1;
-	var npages;
-	var npages=size/limit;
-	npages=npages-(npages%1);
-	if((size%limit)!=0) npages++;
 	
+	if((size%limit)!=0) npages++;
+	/*
 	for(var i=1;i<=npages;i++){
 		if(i==page) res+= '<option selected value=\"'+i+'\">'+i+'</option>';
 		else res+= '<option value=\"'+i+'\">'+i+'</option>';
@@ -710,6 +707,7 @@ function jsonObjectList2HtmlTable(objects,fqn,res){
 						 +'</select> of 1';
 	else
 	res+='</select> of '+npages;
+	*/
 	if(page==npages || limit >=size ) res+='&nbsp;&nbsp;&nbsp;<input type=\"button\" disabled value=\">\" onClick=\"sens=\'+\';showObjects(fqn)\"><br>';
 	else
 		res+='&nbsp;&nbsp;&nbsp;<input type=\"button\" value=\">\" onClick=\"page=page/1+1;sens=\'+\';showObjects(\''+fqn+'\');\"><br>';
@@ -764,10 +762,11 @@ function _insert(fqn){
 //			alert(feed);
 			//document.write(feed);
 			//alert("showObjects success");
-			node.showObjects=false;
-			doc="";
-			doc= view(listRoot, doc);	
-			showNewPage(doc);
+			showInsertPreviousPage(fqn);
+//			node.showObjects=false;
+//			doc="";
+//			doc= view(listRoot, doc);	
+//			showNewPage(doc);
 //			document.getElementById("list").innerHTML= doc;
 		}
 	});
@@ -862,10 +861,11 @@ function _update(fqn){
 //			alert(feed);
 			//document.write(feed);
 			//alert("showObjects success");
-			node.showObjects=false;
+			showUpdatePreviousPage(fqn);
+/*			node.showObjects=false;
 			doc="";
 			doc= view(listRoot, doc);	
-			showNewPage(doc);
+			showNewPage(doc);*/
 //			document.getElementById("list").innerHTML= doc;
 		}
 	});

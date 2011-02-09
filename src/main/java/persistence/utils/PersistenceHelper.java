@@ -17,7 +17,7 @@ import javax.jdo.annotations.PrimaryKey;
 
 import org.apache.commons.beanutils.PropertyUtils;
 
-import persistence.model.Product;
+import persistence.resources.articles.Product;
 
 public class PersistenceHelper {
 	// public static PersistenceHelper instance=null;

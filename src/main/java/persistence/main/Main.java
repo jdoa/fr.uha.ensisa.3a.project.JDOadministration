@@ -6,9 +6,9 @@ import java.lang.reflect.InvocationTargetException;
 
 import javax.jdo.annotations.PrimaryKey;
 
-import persistence.model.Book;
-import persistence.model.Part3model1Class1;
-import persistence.model.Product;
+import persistence.resources.articles.Book;
+import persistence.resources.articles.DvdRom;
+import persistence.resources.articles.Product;
 import persistence.utils.PersistenceHelper;
 
 

@@ -1,4 +1,4 @@
-package persistence.model;
+package persistence.resources.articles;
 
 import javax.jdo.annotations.Discriminator;
 import javax.jdo.annotations.DiscriminatorStrategy;

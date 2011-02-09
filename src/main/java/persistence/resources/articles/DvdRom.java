@@ -1,20 +1,19 @@
-package persistence.model;
+package persistence.resources.articles;
 
 import javax.jdo.annotations.IdentityType;
 import javax.jdo.annotations.PersistenceCapable;
 import javax.jdo.annotations.Persistent;
 import javax.jdo.annotations.PrimaryKey;
 
-@PersistenceCapable(identityType=IdentityType.APPLICATION,table="Part3model1Class1")
-
-public class Part3model1Class1 {
+@PersistenceCapable(identityType=IdentityType.APPLICATION,table="Shop")
+public class DvdRom {
 	@PrimaryKey(name="mon_id")
 	protected long mon_id;
 	@Persistent
 	protected String monAttribut;
 	
 	
-	public Part3model1Class1(long mon_id, String monAttribut) {
+	public DvdRom(long mon_id, String monAttribut) {
 		super();
 		this.mon_id = mon_id;
 		this.monAttribut = monAttribut;
