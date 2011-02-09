@@ -12,14 +12,7 @@ import java.util.Set;
 
 public class ReflexionHelper {
 	
-    /**
-     * Scans all classes accessible from the context class loader which belong to the given package and subpackages.
-     *
-     * @param packageName The base package
-     * @return The classes
-     * @throws ClassNotFoundException
-     * @throws IOException
-     */
+
     @SuppressWarnings("unchecked")
 	public static HashSet<Class> getAllClasses(String packageName)
             throws ClassNotFoundException, IOException 
@@ -43,14 +36,7 @@ public class ReflexionHelper {
         return classes;
     }
 
-    /**
-     * Recursive method used to find all classes in a given directory and subdirs.
-     *
-     * @param directory   The base directory
-     * @param packageName The package name for classes found inside the base directory
-     * @return The classes
-     * @throws ClassNotFoundException
-     */
+   
     @SuppressWarnings("unchecked")
 	private static List<Class> findClasses(File directory, String packageName) throws ClassNotFoundException 
 	{

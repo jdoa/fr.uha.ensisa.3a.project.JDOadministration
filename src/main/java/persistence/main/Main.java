@@ -14,36 +14,35 @@ import persistence.utils.PersistenceHelper;
 
 public class Main
 {	
-	private static Field getIdField(Class<?> c){
-		for (Field f : c.getDeclaredFields()) {
-			if (f.isAnnotationPresent(PrimaryKey.class))
-				return f;
-		}
-		if (c.getSuperclass()== c) return null;
-		return getIdField(c.getSuperclass());
-	}
+	
     public static void main(String args[]) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException, NoSuchMethodException, InterruptedException
     {
-        PersistenceHelper helper=PersistenceHelper.getInstance("datanucleus.properties");        
+        PersistenceHelper helper=new PersistenceHelper("datanucleus.properties");        
          System.out.println("Affichage du Contenu de la base de donnee:");
          PrintWriter out= new PrintWriter(System.out);
          helper.printResultList(helper.getAllInstancesOf(Book.class),out);
-         helper.printResultList(helper.getAllInstancesOf(Product.class),out);
-         helper.printResultList(helper.getAllInstancesOf(Part3model1Class1.class), out);
+      //   System.out.println("fin Affichage du Contenu de la base de donnee:");
+      //   helper.printResultList(helper.getAllInstancesOf(Product.class),out);
+       //  helper.printResultList(helper.getAllInstancesOf(Part3model1Class1.class), out);
  		Book b= new Book(1200, "test book", "book desgined for tests", 187.98, "junit", "1092883TEST", "Tester as publisher");
- 		Book b2= new Book(1201, "test book", "book desgined for tests", 187.28, "junit", "1092883TEST", "Tester as publisher");
- 		Part3model1Class1 x=new Part3model1Class1(1,"lol");
- 		helper.DeleteInstancesWhere(Part3model1Class1.class,"mon_id==1");
+ 		//Book b2= new Book(1201, "test book", "book desgined for tests", 187.28, "junit", "1092883TEST", "Tester as publisher");
+ 		//Part3model1Class1 x=new Part3model1Class1(1,"lol");
+ 		//helper.DeleteInstancesWhere(Part3model1Class1.class,"mon_id==1");
  		//x.setpKNoPersistenceModel1Class1(1);
- 		helper.persist(x, x.getClass());
- 		System.out.println("affichage après rajout de test");
- 		helper.printResultList(helper.getAllInstancesOf(Part3model1Class1.class), out);
+ 		//helper.persist(x, x.getClass());
+ 	//	System.out.println("affichage après rajout de test");
+ 	//	helper.printResultList(helper.getAllInstancesOf(Part3model1Class1.class), out);
  		
  		//  PersistenceHelper helper=PersistenceHelper.getInstance("datanucleus.properties");
-	 //  helper.DeleteAllInstancesOf(Book.class);
+	  helper.DeleteAllInstancesOf(Book.class);
 	  //  helper.persist(b2, b2.getClass());
-	 //   helper.persist(b,b.getClass());
-	//    helper.printResultList(helper.getAllInstancesOf(Book.class),out);
+	    helper.persist(b,b.getClass());
+	 //  helper.printResultList(helper.getAllInstancesOf(Book.class),out);
+	   b.setDescription("book modifie");
+	   b.setPrice(100.00);
+	   helper.update(b);
+	   System.out.println("affichage après modification");
+	   helper.printResultList(helper.getAllInstancesOf(Book.class),out);
 	    //helper.DeleteInstancesWhere(Book.class,"serial =="+b.getSerial());
 	    //b.setPrice(187.28);
 	  //  List list=(List) helper.getInstancesWhere(Book.class, "price== 187.98", null);
@@ -62,7 +61,7 @@ public class Main
 	   //PropertyUtils.getProperty(bean, name)
 	  //  System.out.println(PropertyUtils.getProperty(p, getIdField(p.getClass()).getName()));
 	  //  System.out.println(PropertyUtils.getProperty(b, getIdField(b.getClass()).getName()));
- 		helper.printResultList(helper.getInstancesWhere(Product.class, "", "name asc"), out);
+ 	//	helper.printResultList(helper.getInstancesWhere(Product.class, "", "name asc"), out);
     }
 }
 

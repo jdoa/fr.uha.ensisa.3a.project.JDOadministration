@@ -10,4 +10,13 @@ import javax.jdo.annotations.PrimaryKey;
 public class Part2model1Class2 {
 	@PrimaryKey
 	String pKPersistence2Class2;
+
+	public String getpKPersistence2Class2() {
+		return pKPersistence2Class2;
+	}
+
+	public void setpKPersistence2Class2(String pKPersistence2Class2) {
+		this.pKPersistence2Class2 = pKPersistence2Class2;
+	}
+	
 }

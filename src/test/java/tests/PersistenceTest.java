@@ -12,7 +12,7 @@ import persistence.utils.PersistenceHelper;
 public class PersistenceTest {
 	@Test
 	public void delete() throws InterruptedException{
-	    PersistenceHelper helper=PersistenceHelper.getInstance("datanucleus.properties");
+	    PersistenceHelper helper=new PersistenceHelper("datanucleus.properties");
 	    helper.DeleteAllInstancesOf(Book.class);
 	    int size = helper.getInstancesWhere(Book.class, "", null).size();
 	    Assert.assertEquals(size, 0);
@@ -20,7 +20,7 @@ public class PersistenceTest {
 	@Test
 	public void insertAndSelect() throws InterruptedException{
 		Book b= new Book(1200, "test book", "book desgined for tests", 187.98, "junit", "1092883TEST", "Tester as publisher");
-	    PersistenceHelper helper=PersistenceHelper.getInstance("datanucleus.properties");
+	    PersistenceHelper helper=new PersistenceHelper("datanucleus.properties");
 	    helper.DeleteAllInstancesOf(Book.class);
 	    helper.persist(b,b.getClass());
 	    int size = helper.getInstancesWhere(Book.class, "serial==1200", null).size();
@@ -29,7 +29,7 @@ public class PersistenceTest {
 	@Test
 	public void update() throws InterruptedException {
 		Book b= new Book(1200, "test book", "book desgined for tests", 1.0, "junit", "1092883TEST", "Tester as publisher");
-	    PersistenceHelper helper=PersistenceHelper.getInstance("datanucleus.properties");
+	    PersistenceHelper helper=new PersistenceHelper("datanucleus.properties");
 	    helper.DeleteAllInstancesOf(Book.class);
 	    helper.persist(b,b.getClass());
 	    b.setPrice(2.0);
@@ -45,7 +45,7 @@ public class PersistenceTest {
         Book book1 = new Book(11,"HP Bible","historiques des produits HP",100,"hewlet-packard", "12345678", "Hp factory");
         Product product = new Product(12,"souris logitech","souris sans fil batterie rechargeable",60);
         Book book = new Book(13,"Les miserables","un chef d'oeuvre de victor hugo",150,"Victory Hugo", "1876", "EDITIONS Blanche neige");
-        PersistenceHelper helper=PersistenceHelper.getInstance("datanucleus.properties");
+        PersistenceHelper helper=new PersistenceHelper("datanucleus.properties");
         helper.DeleteAllInstancesOf(Book.class);
         helper.DeleteAllInstancesOf(Product.class);
         helper.persist(book,book.getClass());

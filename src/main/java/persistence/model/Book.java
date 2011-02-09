@@ -66,6 +66,6 @@ public class Book extends Product
 
     public String toString()
     {
-        return "Book : " + author + " - " + name +" - " + isbn + " - " +publisher +" - " +price;
+        return "Book : " + author + " - " + name + " - " + description + " - " + isbn + " - " +publisher +" - " +price;
     }
 }

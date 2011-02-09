@@ -13,6 +13,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.beanutils.PropertyUtils;
+import org.apache.commons.lang.CharEncoding;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -24,6 +25,7 @@ public class ObjectListing extends HttpServlet {
 	protected void doGet(HttpServletRequest req, HttpServletResponse res)
 			throws ServletException, IOException {
 		//super.doGet(req, res);
+		res.setCharacterEncoding(CharEncoding.UTF_8);
 		res.setContentType("json");
 		PrintWriter out = res.getWriter();
 		JSONArray jsonRep=new JSONArray();
@@ -41,8 +43,8 @@ public class ObjectListing extends HttpServlet {
 			resultMin=Long.parseLong(req.getParameter("resultMin"));
 			resultMax=Long.parseLong(req.getParameter("resultMax"));
 		}
-		
-		PersistenceHelper helper=PersistenceHelper.getInstance("datanucleus.properties");
+	
+		PersistenceHelper helper=new PersistenceHelper("datanucleus.properties");
 		try {
 
 			Class<?> c=Class.forName(fqn);

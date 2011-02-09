@@ -869,61 +869,7 @@ function _update(fqn){
 //			document.getElementById("list").innerHTML= doc;
 		}
 	});
-/*
-	var req = null; 
-
-	document.ajax.dyn.value="Started...";
-	if(window.XMLHttpRequest)
-		req = new XMLHttpRequest(); 
-	else if (window.ActiveXObject)
-		req  = new ActiveXObject(Microsoft.XMLHTTP); 
-
-	req.onreadystatechange = function()
-	{ 
-		document.ajax.dyn.value="Wait server...";
-		if(req.readyState == 4)
-		{
-			if(req.status == 200)
-			{
-				document.ajax.dyn.value="Received:" + req.responseText;	
-			}	
-			else	
-			{
-				document.ajax.dyn.value="Error: returned status code " + req.status + " " + req.statusText;
-			}	
-		} 
-	}; 
-	req.open("PUT", putUrl, true); 
-	req.setRequestHeader("Content-Type", "application/json"); 
-	req.send(newObject); 
-*/
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 }
-//$.ajaxSetup({cache: false}); 
 
 function showObjects(fqn){
 //	alert("showObjects start");
@@ -1055,7 +1001,7 @@ function showChildren(nodeFqn) {
 		//alert(longueurCible);
 	//	document.getElementById("list").firstChild.replaceData(0, longueurCible, doc);
 	//} else
-	//	alert("valeur indéfinie");
+	//	alert("valeur indï¿½finie");
 	return;
 }
 function showNewPage(doc){
